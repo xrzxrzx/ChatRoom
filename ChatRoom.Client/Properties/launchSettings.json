@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ChatRoom.Client (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ChatRoom.Client (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
