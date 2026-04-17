@@ -21,40 +21,56 @@
 
         <TitleBar x:Name="AppTitleBar" Grid.Row="0" />
 
-        <Grid
-            Grid.Row="1"
-            Padding="18"
-            RowSpacing="12">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Style="{StaticResource TitleTextBlockStyle}">聊天室</TextBlock>
-            <TextBox
-                x:Name="ChatTextBox"
-                Grid.Row="1"
-                VerticalAlignment="Stretch"
-                AcceptsReturn="True"
-                IsReadOnly="True"
-                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                TextWrapping="Wrap" />
             <Grid
-                Grid.Row="2"
-                VerticalAlignment="Bottom"
-                ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
+                Grid.Column="0"
+                Padding="18"
+                RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
 
-                <TextBox x:Name="MessageTextBox" Grid.Column="0" />
+                <TextBlock Grid.Row="0" Style="{StaticResource TitleTextBlockStyle}">聊天室</TextBlock>
+                <TextBox
+                    x:Name="ChatTextBox"
+                    Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    AcceptsReturn="True"
+                    IsReadOnly="True"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    TextWrapping="Wrap" />
+                <Grid
+                    Grid.Row="2"
+                    VerticalAlignment="Bottom"
+                    ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="MessageTextBox" Grid.Column="0" />
+                    <Button
+                        x:Name="SendButton"
+                        Grid.Column="1"
+                        Click="SendButton_Click">
+                        发送
+                    </Button>
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Column="1" Padding="18">
                 <Button
-                    x:Name="SendButton"
-                    Grid.Column="1"
-                    Click="SendButton_Click">
-                    发送
+                    x:Name="ConnectButton"
+                    VerticalAlignment="Top"
+                    Click="ConnectButton_Click">
+                    连接服务器
                 </Button>
             </Grid>
         </Grid>

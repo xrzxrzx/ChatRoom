@@ -10,7 +10,6 @@
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
   </Project>
-  <Project Path="ChatRoom.Proto/ChatRoom.Proto.csproj" />
   <Project Path="ChatRoom.Server/ChatRoom.Server.vcxproj" Id="e72508df-5d36-4609-a59a-01505c4d7bca">
     <Platform Solution="*|ARM64" Project="x64" />
   </Project>

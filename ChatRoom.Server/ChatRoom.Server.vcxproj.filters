@@ -13,37 +13,32 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Protos">
-      <UniqueIdentifier>{1d0e5080-5b4a-4a00-b2a9-ea6c1dc76dc2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ChatRoom.cpp">
+    <ClCompile Include="UserSession.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="User.cpp">
+    <ClCompile Include="ChatServer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ChatRoomManager.cpp">
+    <ClCompile Include="ServerMessageBag.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="go compile.md">
-      <Filter>Protos</Filter>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChatRoom.h">
+    <ClInclude Include="UserSession.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="User.h">
+    <ClInclude Include="ChatServer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ChatRoomManager.h">
+    <ClInclude Include="ServerMessageBag.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
