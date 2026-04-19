@@ -1,8 +1,14 @@
 #include "UserSession.h"
+#include"ServerMessageBag.h"
+#include"ClientMessageBag.h"
 #include <iostream>
 
 using std::cout;
 using std::endl;
+
+using ClientMessage::RequestBag;
+using ClientMessage::ResponseBag;
+using ServerMessage::ServerMessageBag;
 
 void UserSession::Start()
 {
@@ -58,7 +64,7 @@ void UserSession::do_send(const std::string& message)
 
 void UserSession::OnMessageReceived(const std::string& message)
 {
-
+	RequestBag requestBag(message);
 }
 
 void UserSession::SendMessage(const std::string& message)
