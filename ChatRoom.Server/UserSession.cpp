@@ -62,9 +62,23 @@ void UserSession::do_send(const std::string& message)
 		});
 }
 
+//消息分拣
 void UserSession::OnMessageReceived(const std::string& message)
 {
+	using ClientMessage::CommandType;
 	RequestBag requestBag(message);
+
+	switch (requestBag.GetCommand())
+	{
+	case CommandType::Message:
+		_messageCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
+		break;
+	case CommandType::Request:
+		_requestCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
+		break;
+	default:
+		break;
+	}
 }
 
 void UserSession::SendMessage(const std::string& message)
@@ -75,4 +89,14 @@ void UserSession::SendMessage(const std::string& message)
 	{
 		do_send(_messageQueue.front());
 	}
+}
+
+void UserSession::SetMessageCommandHandle(std::function<void(const std::string& echo, const json& params)> handle)
+{
+	_messageCommandHandle = handle;
+}
+
+void UserSession::SetRequestCommandHandle(std::function<void(const std::string& echo, const json& params)> handle)
+{
+	_requestCommandHandle = handle;
 }

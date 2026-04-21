@@ -10,9 +10,19 @@ RequestBag::RequestBag(const string& raw_message)
 	_parameters = j["params"];
 }
 
-string& RequestBag::GetCommand()
+CommandType RequestBag::GetCommand()
 {
-	return _command;
+	CommandType command;
+	if (_command == "message")
+	{
+		command = CommandType::Message;
+	}
+	else if(_command == "request")
+	{
+		command = CommandType::Request;
+	}
+
+	return command;
 }
 
 string& RequestBag::GetEcho()

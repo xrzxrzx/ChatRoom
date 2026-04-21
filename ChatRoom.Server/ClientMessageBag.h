@@ -8,11 +8,17 @@ using json = nlohmann::json;
 
 namespace ClientMessage
 {
+	enum CommandType
+	{
+		Message,
+		Request
+	};
+
 	class RequestBag
 	{
 	public:
 		RequestBag(const string& raw_message);
-		string& GetCommand();
+		CommandType GetCommand();
 		string& GetEcho();
 		json& GetParameters();
 
