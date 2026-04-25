@@ -1,14 +1,9 @@
 #include "UserSession.h"
-#include"ServerMessageBag.h"
-#include"ClientMessageBag.h"
+#include"ChatRoomException.h"
 #include <iostream>
 
 using std::cout;
 using std::endl;
-
-using ClientMessage::RequestBag;
-using ClientMessage::ResponseBag;
-using ServerMessage::ServerMessageBag;
 
 void UserSession::Start()
 {
@@ -62,22 +57,49 @@ void UserSession::do_send(const std::string& message)
 		});
 }
 
-//消息分拣
 void UserSession::OnMessageReceived(const std::string& message)
 {
-	using ClientMessage::CommandType;
+	json responseData;
 	RequestBag requestBag(message);
+	ResponseBag responseBag(requestBag.GetEcho());
+
+	try
+	{
+		responseData = SwitchCommand(requestBag);
+	}
+	catch (const ChatRoomException::APITimeOutException& e)
+	{
+		responseBag.AddRecode(e.code(), e.what());
+	}
+	catch (const ChatRoomException::InvalidParameterException& e)
+	{
+		responseBag.AddRecode(e.code(), e.what());
+	}
+	catch (const std::exception& e)
+	{
+		cout << "未知错误: " << e.what() << endl;
+	}
+
+	responseBag.AddData("data", responseData["data"]);
+	SendMessage(responseBag.ToJsonString());
+}
+
+//消息分拣
+json& UserSession::SwitchCommand(const ClientMessage::RequestBag& requestBag)
+{
+	using ClientMessage::CommandType;
+
+	json responseData;
 
 	switch (requestBag.GetCommand())
 	{
 	case CommandType::Message:
-		_messageCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
-		break;
+		return _messageCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
 	case CommandType::Request:
-		_requestCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
-		break;
+		return _requestCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
 	default:
-		break;
+		static json default_json;
+		return default_json;
 	}
 }
 
@@ -91,12 +113,12 @@ void UserSession::SendMessage(const std::string& message)
 	}
 }
 
-void UserSession::SetMessageCommandHandle(std::function<void(const std::string& echo, const json& params)> handle)
+void UserSession::SetMessageCommandHandle(std::function<json&(const std::string& echo, const json& params)> handle)
 {
 	_messageCommandHandle = handle;
 }
 
-void UserSession::SetRequestCommandHandle(std::function<void(const std::string& echo, const json& params)> handle)
+void UserSession::SetRequestCommandHandle(std::function<json&(const std::string& echo, const json& params)> handle)
 {
 	_requestCommandHandle = handle;
 }

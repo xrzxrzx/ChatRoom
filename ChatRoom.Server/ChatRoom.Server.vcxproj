@@ -127,8 +127,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ChatRoomException.cpp" />
     <ClCompile Include="ChatServer.cpp" />
     <ClCompile Include="ClientMessageBag.cpp" />
+    <ClCompile Include="CoreService.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="ServerMessageBag.cpp" />
     <ClCompile Include="UserSession.cpp" />
@@ -137,8 +139,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChatRoomException.h" />
     <ClInclude Include="ChatServer.h" />
     <ClInclude Include="ClientMessageBag.h" />
+    <ClInclude Include="CoreService.h" />
     <ClInclude Include="ServerMessageBag.h" />
     <ClInclude Include="UserSession.h" />
   </ItemGroup>

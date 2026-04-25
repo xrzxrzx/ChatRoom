@@ -10,9 +10,9 @@ RequestBag::RequestBag(const string& raw_message)
 	_parameters = j["params"];
 }
 
-CommandType RequestBag::GetCommand()
+CommandType RequestBag::GetCommand() const
 {
-	CommandType command;
+	CommandType command(CommandType::Message);
 	if (_command == "message")
 	{
 		command = CommandType::Message;
@@ -21,16 +21,20 @@ CommandType RequestBag::GetCommand()
 	{
 		command = CommandType::Request;
 	}
+	else
+	{
+		command = CommandType::Unknown;
+	}
 
 	return command;
 }
 
-string& RequestBag::GetEcho()
+const string& RequestBag::GetEcho() const
 {
 	return _echo;
 }
 
-json& RequestBag::GetParameters()
+const json& RequestBag::GetParameters() const
 {
 	return _parameters;
 }

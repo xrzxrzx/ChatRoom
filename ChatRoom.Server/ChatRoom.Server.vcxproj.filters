@@ -30,6 +30,12 @@
     <ClCompile Include="ClientMessageBag.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CoreService.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatRoomException.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -45,6 +51,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ClientMessageBag.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreService.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatRoomException.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

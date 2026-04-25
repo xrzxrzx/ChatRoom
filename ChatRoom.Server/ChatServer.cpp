@@ -1,5 +1,4 @@
 #include "ChatServer.h"
-#include "UserSession.h"
 #include <iostream>
 
 using std::cout;
@@ -18,7 +17,11 @@ void ChatServer::StartAccept()
 		{
 			if (!error)
 			{
-				std::make_shared<UserSession>(std::move(_socket))->Start();
+				auto session = std::make_shared<UserSession>(std::move(_socket));
+				_sessions.push_back(session);
+				session->SetMessageCommandHandle(_messageCommandHandle);
+				session->SetRequestCommandHandle(_requestCommandHandle);
+				session->Start();
 			}
 			else
 			{
@@ -26,4 +29,22 @@ void ChatServer::StartAccept()
 			}
 			StartAccept();
 		});
+}
+
+void ChatServer::BroadcastMessage(const std::string& message)
+{
+	for (auto& session : _sessions)
+	{
+		session->SendMessage(message);
+	}
+}
+
+void ChatServer::SetMessageCommandHandle(std::function<json& (const std::string& echo, const json& params)> handle)
+{
+	_messageCommandHandle = handle;
+}
+
+void ChatServer::SetRequestCommandHandle(std::function<json& (const std::string& echo, const json& params)> handle)
+{
+	_requestCommandHandle = handle;
 }

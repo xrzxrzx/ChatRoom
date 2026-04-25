@@ -11,16 +11,17 @@ namespace ClientMessage
 	enum CommandType
 	{
 		Message,
-		Request
+		Request,
+		Unknown
 	};
 
 	class RequestBag
 	{
 	public:
 		RequestBag(const string& raw_message);
-		CommandType GetCommand();
-		string& GetEcho();
-		json& GetParameters();
+		CommandType GetCommand() const;
+		const string& GetEcho() const;
+		const json& GetParameters() const;
 
 	private:
 		string _command;
