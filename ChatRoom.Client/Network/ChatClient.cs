@@ -1,108 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using ChatRoom.Client.Network.MessageBag.ClientMessageBag;
 
 namespace ChatRoom.Client.Network
 {
     public class ChatClient
     {
-        private string _serverIp;
-        private int _serverPort;
-        private TcpClient _tcpClient;
-        private Task? receiveTask;
+        private ChatClientCore _core;
 
-        #region 事件定义
-        public delegate void OnMessageEventReceivedHandler(JObject data);
-        public event OnMessageEventReceivedHandler? OnMessageEventReceived;
-
-        public delegate void OnNoticeEventReceivedHandler(JObject data);
-        public event OnNoticeEventReceivedHandler? OnNoticeEventReceived;
-
-        public delegate void OnErrorEventReceivedHandler(int recode, string message);
-        public event OnErrorEventReceivedHandler? OnErrorEventReceived;
-
-        public delegate void OnRequestEventReceivedHandler(JObject data);
-        public event OnRequestEventReceivedHandler? OnRequestEventReceived;
-
-        public delegate void OnHeartbeatEventReceivedHandler(JObject data);
-        public event OnHeartbeatEventReceivedHandler? OnHeartbeatEventReceived;
-        #endregion
-
-        public ChatClient(string serverIp, int serverPort)
+        public ChatClient(string serverIp, int serverPort, ChatClientCore.OutputMethodDelegate outputMethod)
         {
-            _serverIp = serverIp;
-            _serverPort = serverPort;
-            _tcpClient = new TcpClient();
+            _core = new ChatClientCore(serverIp, serverPort, outputMethod);
+
+            _core.OnMessageEventReceived += MessageEventHandler;
+            _core.OnNoticeEventReceived += NoticeEventHandler;
+            _core.OnRequestEventReceived += RequestEventHandler;
+            _core.OnErrorEventReceived += ErrorEventHandler;
+            _core.OnHeartbeatEventReceived += HeartbeatEventHandler;
         }
 
         public async Task ConnectAsync()
         {
-            if (!_tcpClient.Connected)
-            {
-                await _tcpClient.ConnectAsync(_serverIp, _serverPort);
-            }
+            await _core.ConnectAsync();
         }
 
-        public void StartReceive()
+        public void StartReceiving()
         {
-            receiveTask = Task.Run(Receive);
+            _core.StartReceive();
         }
 
-        private async void Receive()
+        public async Task SendMessageAsync(RequestMessageBag messageBag)
         {
-            if (_tcpClient.Connected)
-            {
-                NetworkStream stream = _tcpClient.GetStream();
-                byte[] buffer = new byte[1024];
-                while (true)
-                {
-                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (bytesRead > 0)
-                    {
-                        string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        var messageBag = new ServerMessageBag(message);
-                        OnMessageReceived(messageBag);
-                    }
-                }
-            }
+            await _core.SendMessageAsync(messageBag);
         }
 
-        private void OnMessageReceived(ServerMessageBag messageBag)
+        private string MessageEventHandler(JObject data)
         {
-            switch (messageBag.Type)
-            {
-                case "message":
-                    OnMessageEventReceived?.Invoke(messageBag.Data);
-                    break;
-                case "notice":
-                    OnNoticeEventReceived?.Invoke(messageBag.Data);
-                    break;
-                case "request":
-                    OnRequestEventReceived?.Invoke(messageBag.Data);
-                    break;
-                case "heartbeat":
-                    OnHeartbeatEventReceived?.Invoke(messageBag.Data);
-                    break;
-                default:
-                    OnErrorEventReceived?.Invoke(messageBag.Recode, messageBag.Message);
-                    break;
-            }
+            string sender = data["sender"]?.ToString() ?? "Unknown";
+            string message = data["message"]?.ToString() ?? string.Empty;
+            return $"{sender}: {message}";
         }
 
-        public async Task SendMessageAsync(ClientMessageBag messageBag)
+        private string NoticeEventHandler(JObject data)
         {
-            if (_tcpClient.Connected)
-            {
-                NetworkStream stream = _tcpClient.GetStream();
-                string message = messageBag.ToJsonString();
-                byte[] data = Encoding.UTF8.GetBytes(message);
-                await stream.WriteAsync(data, 0, data.Length);
-            }
+            string notice = data["notice"]?.ToString() ?? string.Empty;
+            return $"[Notice] {notice}";
+        }
+
+        private string RequestEventHandler(JObject data)
+        {
+            string request = data["request"]?.ToString() ?? string.Empty;
+            return $"[Request] {request}";
+        }
+
+        private string ErrorEventHandler(int recode, string message)
+        {
+            return $"[Error {recode}] {message}";
+        }
+
+        private string HeartbeatEventHandler(JObject data)
+        {
+            // 心跳事件通常不包含具体数据，这里仅记录接收时间
+            return $"[Heartbeat] {DateTime.Now}";
         }
     }
 }

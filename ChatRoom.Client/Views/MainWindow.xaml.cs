@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using ChatRoom.Client.Network;
 using Newtonsoft.Json.Linq;
+using ChatRoom.Client.Network.MessageBag;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -32,12 +33,8 @@ namespace ChatRoom.Client
                 rootElement.Loaded += (s, e) => SetLogicalSize(530, 500);
             }
 
-            chatClient = new ChatClient("127.0.0.1", 12345);
-            chatClient.OnMessageEventReceived += MessageEventHandler;
-            chatClient.OnNoticeEventReceived += NoticeEventHandler;
-            chatClient.OnRequestEventReceived += RequestEventHandler;
-            chatClient.OnErrorEventReceived += ErrorEventHandler;
-            chatClient.OnHeartbeatEventReceived += HeartbeatEventHandler;
+            chatClient = new ChatClient("127.0.0.1", 12345, UpdateChatMessage);
+            
         }
 
         /// <summary>
@@ -71,37 +68,7 @@ namespace ChatRoom.Client
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             await chatClient.ConnectAsync();
-            chatClient.StartReceive();
-        }
-
-        private void MessageEventHandler(JObject data)
-        {
-            string sender = data["sender"]?.ToString() ?? "Unknown";
-            string message = data["message"]?.ToString() ?? string.Empty;
-            UpdateChatMessage($"{sender}: {message}");
-        }
-
-        private void NoticeEventHandler(JObject data)
-        {
-            string notice = data["notice"]?.ToString() ?? string.Empty;
-            UpdateChatMessage($"[Notice] {notice}");
-        }
-
-        private void RequestEventHandler(JObject data)
-        {
-            string request = data["request"]?.ToString() ?? string.Empty;
-            UpdateChatMessage($"[Request] {request}");
-        }
-
-        private void ErrorEventHandler(int recode, string message)
-        {
-            UpdateChatMessage($"[Error {recode}] {message}");
-        }
-
-        private void HeartbeatEventHandler(JObject data)
-        {
-            // 心跳事件通常不包含具体数据，这里仅记录接收时间
-            UpdateChatMessage($"[Heartbeat] {DateTime.Now}");
+            chatClient.StartReceiving();
         }
 
         private void UpdateChatMessage(string message)
