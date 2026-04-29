@@ -7,6 +7,9 @@ namespace ChatRoom.Client.Network
 {
     public class ChatClient
     {
+        //ChatClient
+        private ChatClientAPI _api;
+        private ChatClientEvent _event;
         private ChatClientCore _core;
 
         public ChatClient(string serverIp, int serverPort, ChatClientCore.OutputMethodDelegate outputMethod)
@@ -30,7 +33,7 @@ namespace ChatRoom.Client.Network
             _core.StartReceive();
         }
 
-        public async Task SendMessageAsync(RequestMessageBag messageBag)
+        public async Task SendMessageAsync(ChatRoomAPIName apiName, )
         {
             await _core.SendMessageAsync(messageBag);
         }

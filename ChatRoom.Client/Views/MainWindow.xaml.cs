@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using ChatRoom.Client.Network;
 using Newtonsoft.Json.Linq;
-using ChatRoom.Client.Network.MessageBag;
+using ChatRoom.Client.Network.MessageBag.ClientMessageBag;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -59,7 +59,7 @@ namespace ChatRoom.Client
             if (MessageTextBox.Text.Trim() == string.Empty)
                 return;
 
-            ClientMessageBag messageBag = new ClientMessageBag("message")
+            RequestMessageBag messageBag = new RequestMessageBag("message")
                                             .AddParameter("data", MessageTextBox.Text.Trim());
 
             await chatClient.SendMessageAsync(messageBag);
