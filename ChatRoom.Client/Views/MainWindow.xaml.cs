@@ -1,12 +1,8 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using ChatRoom.Client.Network;
+using ChatRoom.Client.Core.Network;
 using Newtonsoft.Json.Linq;
-using ChatRoom.Client.Network.MessageBag.ClientMessageBag;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -18,10 +14,12 @@ namespace ChatRoom.Client
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        private ChatClient chatClient;
+        private IChatClientService chatService;
 
-        public MainWindow()
+        public MainWindow(IChatClientService chatClientService)
         {
+            chatService = chatClientService;
+
             InitializeComponent();
 
             ExtendsContentIntoTitleBar = true;
@@ -32,8 +30,6 @@ namespace ChatRoom.Client
             {
                 rootElement.Loaded += (s, e) => SetLogicalSize(530, 500);
             }
-
-            chatClient = new ChatClient("127.0.0.1", 12345, UpdateChatMessage);
             
         }
 
@@ -59,10 +55,8 @@ namespace ChatRoom.Client
             if (MessageTextBox.Text.Trim() == string.Empty)
                 return;
 
-            RequestMessageBag messageBag = new RequestMessageBag("message")
-                                            .AddParameter("data", MessageTextBox.Text.Trim());
-
-            await chatClient.SendMessageAsync(messageBag);
+            await chatService.SendAPIAsync("message", new("sender", 123),
+                                                    new("message", "测试"));
         }
 
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)

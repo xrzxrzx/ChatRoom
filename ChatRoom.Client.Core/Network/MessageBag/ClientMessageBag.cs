@@ -5,7 +5,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ChatRoom.Client.Network.MessageBag.ClientMessageBag
+namespace ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag
 {
     public class RequestMessageBag
     {

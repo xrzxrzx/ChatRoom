@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ChatRoom.Client.Network.MessageBag
+namespace ChatRoom.Client.Core.Network.MessageBag
 {
     public class ServerMessageBag : ReceiveMessageBagBase
     {

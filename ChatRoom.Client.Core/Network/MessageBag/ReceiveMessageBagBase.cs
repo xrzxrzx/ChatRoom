@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatRoom.Client.Network.MessageBag
+namespace ChatRoom.Client.Core.Network.MessageBag
 {
     public class ReceiveMessageBagBase
     {

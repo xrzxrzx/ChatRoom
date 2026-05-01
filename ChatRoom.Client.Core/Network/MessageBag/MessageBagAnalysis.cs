@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatRoom.Client.Network.MessageBag
+namespace ChatRoom.Client.Core.Network.MessageBag
 {
     public class MessageBagAnalysis
     {
@@ -29,7 +29,7 @@ namespace ChatRoom.Client.Network.MessageBag
             return new ServerMessageBag(messageJson);
         }
 
-        public ClientMessageBag.ResponseMessageBag GetResponseMessageBag()
+        public ResponseMessageBag GetResponseMessageBag()
         {
             return new ClientMessageBag.ResponseMessageBag(messageJson);
         }
