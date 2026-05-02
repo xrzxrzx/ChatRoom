@@ -55,7 +55,7 @@ namespace ChatRoom.Client
             if (MessageTextBox.Text.Trim() == string.Empty)
                 return;
 
-            await chatService.SendAPIAsync("message", new("sender", 123),
+            await chatService.CallAPIAsync("message", new("sender", 123),
                                                     new("message", "测试"));
         }
 

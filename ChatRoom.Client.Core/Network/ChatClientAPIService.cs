@@ -1,18 +1,59 @@
 ﻿using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
 using Newtonsoft.Json.Linq;
+using System.Collections.Concurrent;
 
 namespace ChatRoom.Client.Core.Network
 {
     internal interface IChatClientAPIService : IDisposable
     {
-        Task<ResponseMessageBag> SendAPIAsync(string apiName, IEnumerable<APIParameter> parameters);
+        Task<ResponseMessageBag> CallAPIAsync(string apiName, IEnumerable<APIParameter> parameters);
+        void OnResponseReceived(ResponseMessageBag messageBag);
+
+        delegate Task SendMessageAsyncDelegate(string message);
+        event SendMessageAsyncDelegate SendMessageAsync;
     }
 
     internal class ChatClientAPIService : IChatClientAPIService
     {
-        public async Task<ResponseMessageBag> SendAPIAsync(string apiName, IEnumerable<APIParameter> parameters)
+        ConcurrentDictionary<string ,TaskCompletionSource<ResponseMessageBag>> _responseWaiters;
+
+        public event IChatClientAPIService.SendMessageAsyncDelegate? SendMessageAsync;
+
+        public ChatClientAPIService()
         {
-            throw new NotImplementedException();
+            _responseWaiters = new ConcurrentDictionary<string, TaskCompletionSource<ResponseMessageBag>>();
+        }
+
+        public async Task<ResponseMessageBag> CallAPIAsync(string apiName, IEnumerable<APIParameter> parameters)
+        {
+            string echo = Guid.NewGuid().ToString();
+            RequestMessageBag messageBag = new RequestMessageBag(apiName).SetEcho(echo);
+
+            foreach(var param in parameters)
+            {
+                messageBag.AddParameter(param.Key, (dynamic)param.Value);
+            }
+
+            var tcs = new TaskCompletionSource<ResponseMessageBag>();
+            _responseWaiters.TryAdd(echo, tcs);
+            
+            SendMessageAsync?.Invoke(messageBag.ToJsonString());
+
+            return await tcs.Task;
+        }
+
+        public void OnResponseReceived(ResponseMessageBag messageBag)
+        {
+            string echo = messageBag.Echo;
+            TaskCompletionSource<ResponseMessageBag>? tcs;
+
+            _responseWaiters.TryGetValue(echo, out tcs);
+            if(tcs == null)
+            {
+                //TODO 日志记录未找到对应的等待者
+            }
+
+            tcs?.SetResult(messageBag);
         }
 
         public void Dispose()

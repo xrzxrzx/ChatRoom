@@ -11,7 +11,7 @@ namespace ChatRoom.Client.Core.Network
     {
         public Task ConnectAsync();
         public void StartReceiving();
-        public Task<ResponseMessageBag> SendAPIAsync(string apiName, params APIParameter[] parameters);
+        public Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
     }
 
     public class ChatClientService : IChatClientService
@@ -37,6 +37,8 @@ namespace ChatRoom.Client.Core.Network
             _configService = _serviceProvider.GetRequiredService<IChatClientConfigService>();
 
             _coreService.OnEventReceived += _eventService.OnEventReceived;
+            _coreService.OnResponseReceived += _apiService.OnResponseReceived;
+            _apiService.SendMessageAsync += _coreService.SendMessageAsync;
         }
 
         private IServiceProvider ConfigureServices()
@@ -62,9 +64,9 @@ namespace ChatRoom.Client.Core.Network
         {
             _coreService.StartReceive();
         }
-        public async Task<ResponseMessageBag> SendAPIAsync(string apiName, params APIParameter[] parameters)
+        public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
         {
-            return await _apiService.SendAPIAsync(apiName, parameters);
+            return await _apiService.CallAPIAsync(apiName, parameters);
         }
         public void Dispose()
         {
