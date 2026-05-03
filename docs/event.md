@@ -7,7 +7,7 @@
 {
 	recode: 返回的状态码（没有错误时为0）,
 	msg: "返回的错误消息（没有错误时为空）",
-	type: "消息类型（有错误时为空）",
+	post_type: "消息类型（有错误时为空）",
 	data: //返回的正常数据（有错误时为空）
 	{
 		"key1": "value1",
@@ -17,14 +17,14 @@
 }
 ```
 
-**对于`type`字段**
+**对于`post_type`字段**
 
 | 值         | 注解   |
 | --------- | ---- |
-| message   | 消息类型 |
-| notice    | 通知类型 |
-| request   | 请求类型 |
-| heartbeat | 心跳类型 |
+| [message](#message)   | 消息类型 |
+| [notice](#notice)    | 通知类型 |
+| [request](#request预留)   | 请求类型（预留） |
+| [heartbeat](#heartbeat) | 心跳类型 |
 
 ***
 
@@ -35,6 +35,7 @@
 | 字段      |   类型   | 注解   |
 | ------- | ------- | ------- |
 | sender |  `int32` | 发送人ID |
+| nickname |  `string` | 发送人昵称 |
 | message | `string` | 发送的消息 |
 
 ***

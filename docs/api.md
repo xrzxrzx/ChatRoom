@@ -37,12 +37,13 @@
 
 | 值       | 注解   |
 | ------- | ---- |
-| message | 发送消息 |
-| request | 请求   |
+| [send_message](#send_message) | 发送消息 |
+| [login](#login) | 登录 |
+| [request](#request-预留) | 请求   |
 
 ***
 
-## message
+## send_message
 
 **请求参数**：
 
@@ -56,6 +57,24 @@
 | 字段      |   类型   | 注解   |
 | ------- | ------- | ------- |
 | message |  `string` |   发送的消息 |
+
+***
+
+## login
+
+**请求参数**：
+
+| 字段      |   类型   | 注解   |
+| ------- | ------- | ------- |
+| user_id |  `int32` |   用户ID |
+| password | `string` | 密码   |
+
+**返回数据**
+
+| 字段      |   类型   | 注解   |
+| ------- | ------- | ------- |
+| user_id |  `int32` |   用户ID |
+| nickname |  `string` |   用户昵称 |
 
 ***
 
