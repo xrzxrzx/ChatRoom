@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;

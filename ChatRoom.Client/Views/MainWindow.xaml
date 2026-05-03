@@ -6,6 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:ChatRoom.Client"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:ChatRoom.Client.Models"
+    xmlns:viewmodel="using:ChatRoom.Client.ViewModels"
     Title="ChatRoomClient"
     mc:Ignorable="d">
 
@@ -38,14 +40,24 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Style="{StaticResource TitleTextBlockStyle}">聊天室</TextBlock>
-                <TextBox
-                    x:Name="ChatTextBox"
+                <ListView
+                    x:Name="ChatListView"
                     Grid.Row="1"
                     VerticalAlignment="Stretch"
-                    AcceptsReturn="True"
-                    IsReadOnly="True"
+                    BorderBrush="AliceBlue"
+                    BorderThickness="1"
+                    ItemsSource="{x:Bind viewModel.MessageInfoList}"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    TextWrapping="Wrap" />
+                    SelectedItem="{x:Bind viewModel.SelectedMessage, Mode=TwoWay}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:MessageInfo">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock FontWeight="Bold" Text="{x:Bind SenderNickName}" />
+                                <TextBlock Text="{x:Bind Message}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
                 <Grid
                     Grid.Row="2"
                     VerticalAlignment="Bottom"
@@ -55,11 +67,14 @@
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBox x:Name="MessageTextBox" Grid.Column="0" />
+                    <TextBox
+                        x:Name="MessageTextBox"
+                        Grid.Column="0"
+                        Text="{x:Bind viewModel.InputMessage, Mode=TwoWay}" />
                     <Button
                         x:Name="SendButton"
                         Grid.Column="1"
-                        Click="SendButton_Click">
+                        Command="{x:Bind viewModel.SendMessageCommand}">
                         发送
                     </Button>
                 </Grid>
@@ -69,7 +84,7 @@
                 <Button
                     x:Name="ConnectButton"
                     VerticalAlignment="Top"
-                    Click="ConnectButton_Click">
+                    Command="{x:Bind viewModel.ConnectCommand}">
                     连接服务器
                 </Button>
             </Grid>

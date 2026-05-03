@@ -1,4 +1,5 @@
 ﻿using ChatRoom.Client.Core.Network;
+using ChatRoom.Client.Function.ChatRoom;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using System;
@@ -18,8 +19,6 @@ namespace ChatRoom.Client
         private readonly IServiceProvider _serviceProvider;
         public new static App Current => (App)Application.Current;
 
-        private IChatClientService _chatClientService;
-
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -27,8 +26,6 @@ namespace ChatRoom.Client
         public App()
         {
             _serviceProvider = ConfigureServices();
-
-            _chatClientService = _serviceProvider.GetRequiredService<IChatClientService>();
 
             InitializeComponent();
         }
@@ -39,6 +36,7 @@ namespace ChatRoom.Client
 
             // 注册服务
             services.AddSingleton<IChatClientService, ChatClientService>();
+            services.AddSingleton<IChatRoomService, ChatRoomService>();
 
             return services.BuildServiceProvider();
         }
@@ -49,7 +47,7 @@ namespace ChatRoom.Client
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow(_chatClientService);
+            _window = new MainWindow(_serviceProvider);
             _window.Activate();
         }
     }

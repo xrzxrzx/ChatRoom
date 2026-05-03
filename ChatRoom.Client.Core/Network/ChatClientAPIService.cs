@@ -1,5 +1,6 @@
 ﻿using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using System.Collections.Concurrent;
 
 namespace ChatRoom.Client.Core.Network
@@ -39,7 +40,18 @@ namespace ChatRoom.Client.Core.Network
             
             SendMessageAsync?.Invoke(messageBag.ToJsonString());
 
-            return await tcs.Task;
+            //设置十秒超时
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            try
+            {
+                return await tcs.Task.WaitAsync(cts.Token);
+            }
+            catch (TimeoutException)
+            {
+                Log.Warning($"API '{apiName}' 调用超时 (10秒), Echo: {echo}");
+                _responseWaiters.TryRemove(echo, out _); // 清理超时的任务
+                return new ResponseMessageBag(false, "API 调用超时");
+            }
         }
 
         public void OnResponseReceived(ResponseMessageBag messageBag)
@@ -50,7 +62,7 @@ namespace ChatRoom.Client.Core.Network
             _responseWaiters.TryGetValue(echo, out tcs);
             if(tcs == null)
             {
-                //TODO 日志记录未找到对应的等待者
+                Log.Warning($"未找到对应的 API 响应等待者，Echo: {echo}");
             }
 
             tcs?.SetResult(messageBag);

@@ -4,11 +4,11 @@ using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace ChatRoom.Client.Core.Network
 {
@@ -35,6 +35,13 @@ namespace ChatRoom.Client.Core.Network
         public ChatClientCoreService()
         {
             _tcpClient = new TcpClient();
+
+            //初始化日志记录器
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("logs/chatclient.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
         }
 
         public async Task ConnectAsync(ChatClientConfig chatClientConfig)

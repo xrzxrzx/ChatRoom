@@ -60,14 +60,17 @@ namespace ChatRoom.Client.Core.Network
             ChatClientConfig config = _configService.GetConfig();
             await _coreService.ConnectAsync(config);
         }
+
         public void StartReceiving()
         {
             _coreService.StartReceive();
         }
+
         public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
         {
             return await _apiService.CallAPIAsync(apiName, parameters);
         }
+
         public void Dispose()
         {
             throw new NotImplementedException();

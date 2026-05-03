@@ -65,12 +65,22 @@ namespace ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag
     public class ResponseMessageBag : ReceiveMessageBagBase
     {
         string echo = string.Empty;
+        bool success = false;
+        string errorMessage = string.Empty;
 
         public string Echo { get => echo; set => echo = value; }
+        public bool Success { get => success; set => success = value; }
+        public string ErrorMessage { get => errorMessage; set => errorMessage = value; }
 
         public ResponseMessageBag(JObject recvJson) : base(recvJson)
         {
             echo = recvJson["echo"]?.ToString() ?? string.Empty;
+        }
+
+        public ResponseMessageBag(bool success = false, string errorMessage = "")
+        {
+            this.success = success;
+            this.errorMessage = errorMessage;
         }
     }
 }
