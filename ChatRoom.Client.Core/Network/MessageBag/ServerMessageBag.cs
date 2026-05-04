@@ -16,7 +16,7 @@ namespace ChatRoom.Client.Core.Network.MessageBag
 
         public ServerMessageBag(JObject recvJson) : base(recvJson)
         {
-            type = recvJson.Value<string>("type") ?? string.Empty;
+            type = recvJson.Value<string>("post_type") ?? string.Empty;
         }
     }
 }

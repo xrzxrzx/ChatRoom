@@ -33,7 +33,11 @@ namespace ChatRoom.Client.ViewModels
         [RelayCommand]
         private async Task ConnectAsync()
         {
-            chatRoomService.ConnectToServer();
+            //chatRoomService.ConnectToServer();
+
+            MessageInfoList.Add(new MessageInfo(1, "System", "Connected to the server."));
+            MessageInfoList.Add(new MessageInfo(1, "Self", "Connected to the server."));
+            MessageInfoList.Add(new MessageInfo(1, "11111", "Connected to the server."));
         }
 
         [RelayCommand]
@@ -44,6 +48,19 @@ namespace ChatRoom.Client.ViewModels
                 await chatRoomService.SendMessageAsync(InputMessage);
                 InputMessage = string.Empty;
             }
+        }
+
+        private void OnMessageReceived(OutputMessageInfo message)
+        {
+            string senderName = message.Sender switch
+            {
+                OutputMessageInfo.MessageSender.System => "System",
+                OutputMessageInfo.MessageSender.OtherUser => "Other User",
+                OutputMessageInfo.MessageSender.Self => "You",
+                _ => "Unknown"
+            };
+
+            MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, senderName, message.Content));
         }
     }
 }

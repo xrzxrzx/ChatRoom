@@ -31,6 +31,23 @@ namespace ChatRoom.Client
             {
                 rootElement.Loaded += (s, e) => SetLogicalSize(530, 500);
             }
+
+            // 监听 MessageInfoList 的集合变化，一旦有新数据添加就滚动到底部
+            viewModel.MessageInfoList.CollectionChanged += (s, e) =>
+            {
+                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                {
+                    // 确保在UI线程执行，将 ListView 滚动到最后一个元素
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        var items = viewModel.MessageInfoList;
+                        if (items.Count > 0)
+                        {
+                            ChatListView.ScrollIntoView(items[items.Count - 1]);
+                        }
+                    });
+                }
+            };
         }
 
         /// <summary>

@@ -16,6 +16,8 @@ namespace ChatRoom.Client.Function.ChatRoom
         Task SendMessageAsync(string message);
         Task LogInAsync(string user_id, string password);
         Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
+        public delegate void OutputMessageDelegate(OutputMessageInfo outputMessage);
+        public event OutputMessageDelegate? OutputMessage;
     }
 
     internal class ChatRoomService : IChatRoomService
@@ -23,8 +25,7 @@ namespace ChatRoom.Client.Function.ChatRoom
         private IChatClientService _chatClientService;
         private UserInfo _userInfo;
 
-        public delegate void OutputMessageDelegate(OutputMessageInfo outputMessage);
-        public event OutputMessageDelegate? OutputMessage;
+        public event IChatRoomService.OutputMessageDelegate? OutputMessage;
 
         public ChatRoomService(IChatClientService chatClientService)
         {
@@ -71,7 +72,7 @@ namespace ChatRoom.Client.Function.ChatRoom
         }
     }
 
-    internal record OutputMessageInfo
+    internal class OutputMessageInfo
     {
         public enum MessageSender
         {
@@ -80,13 +81,27 @@ namespace ChatRoom.Client.Function.ChatRoom
             Self
         }
 
-        MessageSender Sender { get; init; }
-        string Content { get; init; } = string.Empty;
+        public record SenderInfomation
+        {
+            public int Id { get; set; }
+            public string NickName { get; set; } = string.Empty;
+        }
+
+        public MessageSender Sender { get; init; }
+        public SenderInfomation SenderInfo { get; init; } = new SenderInfomation();
+        public string Content { get; init; } = string.Empty;
 
         public OutputMessageInfo(MessageSender sender, string content)
         {
             Sender = sender;
             Content = content;
+        }
+
+        public OutputMessageInfo SetSenderInfo(int id, string nickname)
+        {
+            SenderInfo.Id = id;
+            SenderInfo.NickName = nickname;
+            return this;
         }
     }
 }
