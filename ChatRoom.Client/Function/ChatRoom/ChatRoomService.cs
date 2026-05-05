@@ -1,6 +1,7 @@
 ﻿using ChatRoom.Client.Core.Network;
-using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
+using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,6 +17,7 @@ namespace ChatRoom.Client.Function.ChatRoom
         Task SendMessageAsync(string message);
         Task LogInAsync(string user_id, string password);
         Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
+
         public delegate void OutputMessageDelegate(OutputMessageInfo outputMessage);
         public event OutputMessageDelegate? OutputMessage;
     }
@@ -31,6 +33,10 @@ namespace ChatRoom.Client.Function.ChatRoom
         {
             _chatClientService = chatClientService;
             _userInfo = new UserInfo();
+
+            ChatRoomFunction.SetOutputMessageDelegate(message => OutputMessage?.Invoke(message));
+
+            _chatClientService.SubscribeToEvent<MessageEvent>(ChatRoomFunction.OutputMessage);
         }
 
         public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
@@ -53,17 +59,24 @@ namespace ChatRoom.Client.Function.ChatRoom
         {
             var response = await _chatClientService.CallAPIAsync("login", new APIParameter("user_id", user_id),
                                                      new APIParameter("password", password));
-            if(response.Success == false)
+            if (response.Success == false)
             {
-                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSender.System, $"登陆失败: {response.ErrorMessage }"));
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"登陆失败: {response.ErrorMessage}"));
             }
             _userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         }
 
         public async Task SendMessageAsync(string message)
         {
-            await _chatClientService.CallAPIAsync("send_message", new APIParameter("sender", _userInfo.Id),
+            var response = await _chatClientService.CallAPIAsync("send_message", new APIParameter("sender", _userInfo.Id),
                                                      new APIParameter("message", message));
+
+            if (response.Success == false)
+            {
+                Log.Warning($"消息发送失败: {response.ErrorMessage}");
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"消息发送失败: {response.ErrorMessage}"));
+                return;
+            }
         }
 
         public void Dispose()
@@ -74,7 +87,7 @@ namespace ChatRoom.Client.Function.ChatRoom
 
     internal class OutputMessageInfo
     {
-        public enum MessageSender
+        public enum MessageSenderType
         {
             System,
             OtherUser,
@@ -87,21 +100,22 @@ namespace ChatRoom.Client.Function.ChatRoom
             public string NickName { get; set; } = string.Empty;
         }
 
-        public MessageSender Sender { get; init; }
+        public MessageSenderType SenderType { get; init; }
         public SenderInfomation SenderInfo { get; init; } = new SenderInfomation();
         public string Content { get; init; } = string.Empty;
 
-        public OutputMessageInfo(MessageSender sender, string content)
+        public OutputMessageInfo(MessageSenderType senderType, string content)
         {
-            Sender = sender;
+            SenderType = senderType;
             Content = content;
         }
 
-        public OutputMessageInfo SetSenderInfo(int id, string nickname)
+        public OutputMessageInfo(int id, string nickname, string content)
         {
+            SenderType = MessageSenderType.OtherUser;
+            Content = content;
             SenderInfo.Id = id;
             SenderInfo.NickName = nickname;
-            return this;
         }
     }
 }

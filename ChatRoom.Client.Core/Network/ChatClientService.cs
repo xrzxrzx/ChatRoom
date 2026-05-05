@@ -1,5 +1,6 @@
 ﻿using ChatRoom.Client.Core.Common;
-using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
+using ChatRoom.Client.Core.Network.MessageBag;
+using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using System;
@@ -12,6 +13,7 @@ namespace ChatRoom.Client.Core.Network
         public Task ConnectAsync();
         public void StartReceiving();
         public Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
+        public void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag;
     }
 
     public class ChatClientService : IChatClientService
@@ -74,6 +76,11 @@ namespace ChatRoom.Client.Core.Network
         public void Dispose()
         {
             throw new NotImplementedException();
+        }
+
+        public void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag
+        {
+            _eventService.Subscribe(handler);
         }
     }
 }

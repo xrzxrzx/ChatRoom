@@ -5,7 +5,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag
+namespace ChatRoom.Client.Core.Network.MessageBag.APIMessageBag
 {
     public class RequestMessageBag
     {
@@ -62,25 +62,31 @@ namespace ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag
         }
     }
 
-    public class ResponseMessageBag : ReceiveMessageBagBase
+    public class ResponseMessageBag
     {
-        string echo = string.Empty;
-        bool success = false;
-        string errorMessage = string.Empty;
+        public string Echo { get; private set; } = string.Empty;
+        public bool Success => Recode == 0;
+        public string ErrorMessage { get; private set; } = string.Empty;
+        public int Recode { get; private set; } = 0;
+        public JObject Data { get; private set; } = new JObject();
+        public JObject RawJson { get; private set; } = new JObject();
 
-        public string Echo { get => echo; set => echo = value; }
-        public bool Success { get => success; set => success = value; }
-        public string ErrorMessage { get => errorMessage; set => errorMessage = value; }
-
-        public ResponseMessageBag(JObject recvJson) : base(recvJson)
+        public ResponseMessageBag(JObject recvJson)
         {
-            echo = recvJson["echo"]?.ToString() ?? string.Empty;
+            Echo = recvJson["echo"]?.ToString() ?? string.Empty;
+            Recode = recvJson.Value<int?>("recode") ?? 0;
+            ErrorMessage = recvJson.Value<string>("msg") ?? string.Empty;
+            Data = recvJson.Value<JObject>("data") ?? new JObject();
+            RawJson = recvJson ?? new JObject();
         }
 
         public ResponseMessageBag(bool success = false, string errorMessage = "")
         {
-            this.success = success;
-            this.errorMessage = errorMessage;
+            Recode = success ? 0 : -1;
+            ErrorMessage = errorMessage;
+            Echo = string.Empty;
+            Data = new JObject();
+            RawJson = new JObject();
         }
     }
 }

@@ -1,8 +1,9 @@
+using ChatRoom.Client.Models;
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI;
 using System;
-using Microsoft.UI.Xaml;
 
 namespace ChatRoom.Client.Converters
 {
@@ -10,12 +11,12 @@ namespace ChatRoom.Client.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            var nickName = value as string;
-            if (nickName == "System")
+            var senderType = (MessageInfo.MessageInfoSenderType)value;
+            if (senderType == MessageInfo.MessageInfoSenderType.System)
             {
                 return new SolidColorBrush(Colors.SlateBlue);
             }
-            else if(nickName == "Self")
+            else if(senderType == MessageInfo.MessageInfoSenderType.Self)
             {
                 return new SolidColorBrush(new Windows.UI.Color() { A = 255, R = 0, G = 62, B = 102 });
             }

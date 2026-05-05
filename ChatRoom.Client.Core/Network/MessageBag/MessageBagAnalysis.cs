@@ -1,4 +1,4 @@
-﻿using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
+﻿using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace ChatRoom.Client.Core.Network.MessageBag
     {
         JObject messageJson;
 
-        public bool IsEvent => messageJson["event"] != null;
+        public bool IsEvent => messageJson["post_type"] != null;
         public bool IsResponse => !IsEvent;
 
         /// <summary>
@@ -25,14 +25,14 @@ namespace ChatRoom.Client.Core.Network.MessageBag
             messageJson = JObject.Parse(raw_message);
         }
 
-        public ServerMessageBag GetEventMessageBag()
+        public EventMessageBag GetEventMessageBag()
         {
-            return new ServerMessageBag(messageJson);
+            return new EventMessageBag(messageJson);
         }
 
         public ResponseMessageBag GetResponseMessageBag()
         {
-            return new ClientMessageBag.ResponseMessageBag(messageJson);
+            return new ResponseMessageBag(messageJson);
         }
     }
 }

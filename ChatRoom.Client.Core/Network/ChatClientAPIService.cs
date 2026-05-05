@@ -1,4 +1,4 @@
-﻿using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
+﻿using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using System.Collections.Concurrent;

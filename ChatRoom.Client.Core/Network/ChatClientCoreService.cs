@@ -1,6 +1,6 @@
 ﻿using ChatRoom.Client.Core.Common;
 using ChatRoom.Client.Core.Network.MessageBag;
-using ChatRoom.Client.Core.Network.MessageBag.ClientMessageBag;
+using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,7 +18,7 @@ namespace ChatRoom.Client.Core.Network
         public void StartReceive();
         public Task SendMessageAsync(string message);
 
-        public delegate void OnEventReceivedHandler(ServerMessageBag messageBag);
+        public delegate void OnEventReceivedHandler(EventMessageBag messageBag);
         public event OnEventReceivedHandler OnEventReceived;
 
         public delegate void OnResponseReceivedHandler(ResponseMessageBag messageBag);
@@ -83,7 +83,7 @@ namespace ChatRoom.Client.Core.Network
                     MessageBagAnalysis bagAnalysis = new MessageBagAnalysis(message);
                     if (bagAnalysis.IsEvent)//事件消息
                     {
-                        ServerMessageBag messageBag = bagAnalysis.GetEventMessageBag();
+                        EventMessageBag messageBag = bagAnalysis.GetEventMessageBag();
                         OnEventReceived?.Invoke(messageBag);
                     }
                     else//API响应消息

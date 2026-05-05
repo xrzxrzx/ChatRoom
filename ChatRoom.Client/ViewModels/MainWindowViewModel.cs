@@ -35,9 +35,9 @@ namespace ChatRoom.Client.ViewModels
         {
             //chatRoomService.ConnectToServer();
 
-            MessageInfoList.Add(new MessageInfo(1, "System", "Connected to the server."));
-            MessageInfoList.Add(new MessageInfo(1, "Self", "Connected to the server."));
-            MessageInfoList.Add(new MessageInfo(1, "11111", "Connected to the server."));
+            MessageInfoList.Add(new MessageInfo("Connected to the server."));
+            MessageInfoList.Add(new MessageInfo(1, "我", "你好。。。。。。。。。。。。。。阿达电视............测试阿萨是的啊实打实的气温气温", true));
+            MessageInfoList.Add(new MessageInfo(1, "用户啊啊啊", "阿达阿达是的阿达阿达是的千问"));
         }
 
         [RelayCommand]
@@ -52,11 +52,11 @@ namespace ChatRoom.Client.ViewModels
 
         private void OnMessageReceived(OutputMessageInfo message)
         {
-            string senderName = message.Sender switch
+            string senderName = message.SenderType switch
             {
-                OutputMessageInfo.MessageSender.System => "System",
-                OutputMessageInfo.MessageSender.OtherUser => "Other User",
-                OutputMessageInfo.MessageSender.Self => "You",
+                OutputMessageInfo.MessageSenderType.System => "System",
+                OutputMessageInfo.MessageSenderType.OtherUser => "Other User",
+                OutputMessageInfo.MessageSenderType.Self => "You",
                 _ => "Unknown"
             };
 

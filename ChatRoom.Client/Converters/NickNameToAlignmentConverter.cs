@@ -1,3 +1,4 @@
+using ChatRoom.Client.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using System;
@@ -8,12 +9,12 @@ namespace ChatRoom.Client.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            var nickName = value as string;
-            if (nickName == "Self")
+            var senderType = (MessageInfo.MessageInfoSenderType)value;
+            if (senderType == MessageInfo.MessageInfoSenderType.Self)
             {
                 return HorizontalAlignment.Right;
             }
-            else if(nickName == "System")
+            else if(senderType == MessageInfo.MessageInfoSenderType.System)
             {
                 return HorizontalAlignment.Center;
             }

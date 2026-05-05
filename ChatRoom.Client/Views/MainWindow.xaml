@@ -61,7 +61,7 @@
                             <!--  解决 Window 中 x:Bind 搭配 StaticResource 导致的编译报错，将含有 Converter 的部分改用 Binding  -->
                             <Grid
                                 Margin="0,0,0,12"
-                                HorizontalAlignment="{Binding SenderNickName, Converter={StaticResource NickNameToAlignmentConverter}}"
+                                HorizontalAlignment="{Binding SenderType, Converter={StaticResource NickNameToAlignmentConverter}}"
                                 RowSpacing="8">
                                 <Grid.RowDefinitions>
                                     <RowDefinition />
@@ -70,19 +70,19 @@
 
                                 <TextBlock
                                     Grid.Row="0"
-                                    HorizontalAlignment="{Binding SenderNickName, Converter={StaticResource NickNameToAlignmentConverter}}"
+                                    HorizontalAlignment="{Binding SenderType, Converter={StaticResource NickNameToAlignmentConverter}}"
                                     FontWeight="Bold"
-                                    Foreground="{Binding SenderNickName, Converter={StaticResource NickNameToColorConverter}}"
+                                    Foreground="{Binding SenderType, Converter={StaticResource NickNameToColorConverter}}"
                                     Text="{x:Bind SenderNickName}" />
 
                                 <Grid
                                     Grid.Row="1"
                                     Padding="4"
-                                    Background="{Binding SenderNickName, Converter={StaticResource NickNameToColorConverter}}"
+                                    Background="{Binding SenderType, Converter={StaticResource NickNameToColorConverter}}"
                                     CornerRadius="3">
                                     <TextBlock
                                         Grid.Row="1"
-                                        HorizontalAlignment="{Binding SenderNickName, Converter={StaticResource NickNameToAlignmentConverter}}"
+                                        HorizontalAlignment="{Binding SenderType, Converter={StaticResource NickNameToAlignmentConverter}}"
                                         Text="{x:Bind Message}"
                                         TextWrapping="Wrap" />
                                 </Grid>
