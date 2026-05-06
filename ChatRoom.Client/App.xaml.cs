@@ -37,6 +37,7 @@ namespace ChatRoom.Client
             // 注册服务
             services.AddSingleton<IChatClientService, ChatClientService>();
             services.AddSingleton<IChatRoomService, ChatRoomService>();
+            services.AddTransient<MainWindow>();
 
             return services.BuildServiceProvider();
         }
@@ -47,7 +48,11 @@ namespace ChatRoom.Client
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = new MainWindow(_serviceProvider);
+            _window = _serviceProvider.GetService<MainWindow>();
+            if (_window == null)
+            {
+                throw new InvalidOperationException("Failed to create the main window.");
+            }
             _window.Activate();
         }
     }
