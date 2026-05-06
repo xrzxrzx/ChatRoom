@@ -25,7 +25,7 @@ namespace ChatRoom.Client
             // XamlRoot.RasterizationScale 需要在 UI 内容加载后才能获取，不使用 DLL 则必须依赖事件
             if (Content is FrameworkElement rootElement)
             {
-                rootElement.Loaded += (s, e) => SetLogicalSize(530, 500);
+                rootElement.Loaded += (s, e) => SetLogicalSize(800, 650);
             }
         }
 

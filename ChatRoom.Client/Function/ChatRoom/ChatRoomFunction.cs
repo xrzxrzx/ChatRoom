@@ -6,11 +6,17 @@ namespace ChatRoom.Client.Function.ChatRoom
 {
     internal static class ChatRoomFunction
     {
-        private static OutputMessageDelegate? _output;
+        private static OutputMessageDelegate? output;
+        private static ILogger? logger;
+
+        public static void SetLogger(ILogger logger)
+        {
+            ChatRoomFunction.logger = logger;
+        }
 
         public static void SetOutputMessageDelegate(OutputMessageDelegate outputMessage)
         {
-            _output = outputMessage;
+            output = outputMessage;
         }
 
         public static void OutputMessage(MessageEvent @event)
@@ -18,7 +24,7 @@ namespace ChatRoom.Client.Function.ChatRoom
             var senderName = @event.Data.Value<string>("nickname");
             if (senderName == null) 
             {
-                Log.Warning($"消息事件缺少发送者信息: {@event}");
+                logger?.Warning($"消息事件缺少发送者信息: {@event}");
                 return;
             }
 
@@ -26,7 +32,7 @@ namespace ChatRoom.Client.Function.ChatRoom
             var messageContent = @event.Data.Value<string>("message") ?? string.Empty;
 
 
-            _output?.Invoke(new(id, senderName, messageContent));
+            output?.Invoke(new(id, senderName, messageContent));
         }
     }
 }

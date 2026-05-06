@@ -10,14 +10,13 @@
     xmlns:models="using:ChatRoom.Client.Models"
     xmlns:viewmodel="using:ChatRoom.Client.ViewModels"
     Title="ChatRoomClient"
-    d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}"
     mc:Ignorable="d">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}">
         <Grid.Resources>
             <converters:NickNameToColorConverter x:Key="NickNameToColorConverter" />
             <converters:NickNameToAlignmentConverter x:Key="NickNameToAlignmentConverter" />
@@ -32,12 +31,72 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
 
             <Grid
                 Grid.Column="0"
+                Padding="12"
+                RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Spacing="12">
+                    <Grid>
+                        <PersonPicture />
+                        <TextBlock>123</TextBlock>
+                        <TextBlock>123</TextBlock>
+                    </Grid>
+
+                    <Button
+                        x:Name="ConnectButton1"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
+                        连接服务器
+                    </Button>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="0.1*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            x:Name="ConnectButton2"
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
+                            注册
+                        </Button>
+                        <Button
+                            x:Name="ConnectButton3"
+                            Grid.Column="2"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
+                            登录
+                        </Button>
+                    </Grid>
+
+                    <Button
+                        x:Name="ConnectButton"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
+                        退出登录
+                    </Button>
+                </StackPanel>
+
+                <ListView
+                    Grid.Row="1"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="4" />
+            </Grid>
+
+            <Grid
+                Grid.Column="1"
                 Padding="18"
                 RowSpacing="12">
                 <Grid.RowDefinitions>
@@ -59,7 +118,6 @@
                     SelectedItem="{Binding DataContext.SelectedMessage, ElementName=ChatListView, Mode=TwoWay}">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:MessageInfo">
-                            <!--  解决 Window 中 x:Bind 搭配 StaticResource 导致的编译报错，将含有 Converter 的部分改用 Binding  -->
                             <Grid
                                 Margin="0,0,0,12"
                                 HorizontalAlignment="{Binding SenderType, Converter={StaticResource NickNameToAlignmentConverter}}"
@@ -93,7 +151,6 @@
 
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
-                            <!--  允许Item的内部内容（如StackPanel）去控制水平对齐  -->
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         </Style>
                     </ListView.ItemContainerStyle>
@@ -118,15 +175,6 @@
                         发送
                     </Button>
                 </Grid>
-            </Grid>
-
-            <Grid Grid.Column="1" Padding="18">
-                <Button
-                    x:Name="ConnectButton"
-                    VerticalAlignment="Top"
-                    Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
-                    连接服务器
-                </Button>
             </Grid>
         </Grid>
     </Grid>

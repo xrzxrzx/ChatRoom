@@ -17,11 +17,12 @@ namespace ChatRoom.Client.Function.ChatRoom
 
         public event IChatRoomService.OutputMessageDelegate? OutputMessage;
 
-        public ChatRoomService(IChatClientService chatClientService)
+        public ChatRoomService(IChatClientService chatClientService, ILogger logger)
         {
             _chatClientService = chatClientService;
             _userInfo = new UserInfo();
 
+            ChatRoomFunction.SetLogger(logger);
             ChatRoomFunction.SetOutputMessageDelegate(message => OutputMessage?.Invoke(message));
 
             _chatClientService.SubscribeToEvent<MessageEvent>(ChatRoomFunction.OutputMessage);
@@ -41,6 +42,18 @@ namespace ChatRoom.Client.Function.ChatRoom
         public void DisconnectToServer()
         {
             throw new NotImplementedException();
+        }
+
+        public async Task LogUpAsync(string user_id, string password, string nickname)
+        {
+            var response = await _chatClientService.CallAPIAsync("register", new APIParameter("user_id", user_id),
+                                                     new APIParameter("password", password),
+                                                     new APIParameter("nickname", nickname));
+            if (response.Success == false)
+            {
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"注册失败: {response.ErrorMessage}"));
+            }
+            _userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         }
 
         public async Task LogInAsync(string user_id, string password)
@@ -65,6 +78,8 @@ namespace ChatRoom.Client.Function.ChatRoom
                 OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"消息发送失败: {response.ErrorMessage}"));
                 return;
             }
+
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.Self, message));
         }
 
         public void Dispose()

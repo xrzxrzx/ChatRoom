@@ -21,7 +21,7 @@ public:
 	UserSession(tcp::socket socket) : _socket(std::move(socket)) {}
 	tcp::socket& Socket() { return _socket; }
 	void Start();
-	void SendMessage(const std::string& message);
+	void SendMessageString(const std::string& message);
 
 	void SetMessageCommandHandle(std::function<json&(const std::string& echo, const json& params)> handle);
 

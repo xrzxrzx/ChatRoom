@@ -81,7 +81,7 @@ void UserSession::OnMessageReceived(const std::string& message)
 	}
 
 	responseBag.AddData("data", responseData["data"]);
-	SendMessage(responseBag.ToJsonString());
+	SendMessageString(responseBag.ToJsonString());
 }
 
 //消息分拣
@@ -103,7 +103,7 @@ json& UserSession::SwitchCommand(const ClientMessage::RequestBag& requestBag)
 	}
 }
 
-void UserSession::SendMessage(const std::string& message)
+void UserSession::SendMessageString(const std::string& message)
 {
 	bool write_in_progress = !_messageQueue.empty();
 	_messageQueue.push(message);

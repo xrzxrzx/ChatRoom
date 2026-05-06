@@ -28,6 +28,7 @@ namespace ChatRoom.Client.ViewModels
         public MainWindowViewModel(IChatRoomService chatRoomService)
         {
             this.chatRoomService = chatRoomService;
+            this.chatRoomService.OutputMessage += OnMessageReceived;
         }
 
         [RelayCommand]
