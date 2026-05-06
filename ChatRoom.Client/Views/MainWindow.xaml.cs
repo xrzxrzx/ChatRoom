@@ -15,12 +15,8 @@ namespace ChatRoom.Client
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        private MainWindowViewModel viewModel;
-
-        public MainWindow(IServiceProvider serviceProvider)
+        public MainWindow()
         {
-            viewModel = new MainWindowViewModel(serviceProvider);
-
             InitializeComponent();
 
             ExtendsContentIntoTitleBar = true;

@@ -1,28 +1,23 @@
 ﻿using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Serilog.Core;
 using System.Collections.Concurrent;
 
 namespace ChatRoom.Client.Core.Network
 {
-    internal interface IChatClientAPIService : IDisposable
+    public class ChatClientAPIService : IChatClientAPIService
     {
-        Task<ResponseMessageBag> CallAPIAsync(string apiName, IEnumerable<APIParameter> parameters);
-        void OnResponseReceived(ResponseMessageBag messageBag);
+        private ILogger logger;
 
-        delegate Task SendMessageAsyncDelegate(string message);
-        event SendMessageAsyncDelegate SendMessageAsync;
-    }
-
-    internal class ChatClientAPIService : IChatClientAPIService
-    {
         ConcurrentDictionary<string ,TaskCompletionSource<ResponseMessageBag>> _responseWaiters;
 
         public event IChatClientAPIService.SendMessageAsyncDelegate? SendMessageAsync;
 
-        public ChatClientAPIService()
+        public ChatClientAPIService(ILogger logger)
         {
             _responseWaiters = new ConcurrentDictionary<string, TaskCompletionSource<ResponseMessageBag>>();
+            this.logger = logger;
         }
 
         public async Task<ResponseMessageBag> CallAPIAsync(string apiName, IEnumerable<APIParameter> parameters)
@@ -48,7 +43,7 @@ namespace ChatRoom.Client.Core.Network
             }
             catch (TimeoutException)
             {
-                Log.Warning($"API '{apiName}' 调用超时 (10秒), Echo: {echo}");
+                logger.Warning($"API '{apiName}' 调用超时 (10秒), Echo: {echo}");
                 _responseWaiters.TryRemove(echo, out _); // 清理超时的任务
                 return new ResponseMessageBag(false, "API 调用超时");
             }
@@ -62,7 +57,7 @@ namespace ChatRoom.Client.Core.Network
             _responseWaiters.TryGetValue(echo, out tcs);
             if(tcs == null)
             {
-                Log.Warning($"未找到对应的 API 响应等待者，Echo: {echo}");
+                logger.Warning($"未找到对应的 API 响应等待者，Echo: {echo}");
             }
 
             tcs?.SetResult(messageBag);

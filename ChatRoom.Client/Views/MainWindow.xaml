@@ -10,6 +10,7 @@
     xmlns:models="using:ChatRoom.Client.Models"
     xmlns:viewmodel="using:ChatRoom.Client.ViewModels"
     Title="ChatRoomClient"
+    d:DataContext="{d:DesignInstance Type=viewmodel:MainWindowViewModel}"
     mc:Ignorable="d">
 
     <Window.SystemBackdrop>
@@ -53,9 +54,9 @@
                     BorderBrush="Gray"
                     BorderThickness="1"
                     CornerRadius="5"
-                    ItemsSource="{x:Bind viewModel.MessageInfoList}"
+                    ItemsSource="{Binding DataContext.MessageInfoList, ElementName=ChatListView}"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    SelectedItem="{x:Bind viewModel.SelectedMessage, Mode=TwoWay}">
+                    SelectedItem="{Binding DataContext.SelectedMessage, ElementName=ChatListView, Mode=TwoWay}">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:MessageInfo">
                             <!--  解决 Window 中 x:Bind 搭配 StaticResource 导致的编译报错，将含有 Converter 的部分改用 Binding  -->
@@ -109,11 +110,11 @@
                     <TextBox
                         x:Name="MessageTextBox"
                         Grid.Column="0"
-                        Text="{x:Bind viewModel.InputMessage, Mode=TwoWay}" />
+                        Text="{Binding DataContext.InputMessage, ElementName=MessageTextBox, Mode=TwoWay}" />
                     <Button
                         x:Name="SendButton"
                         Grid.Column="1"
-                        Command="{x:Bind viewModel.SendMessageCommand}">
+                        Command="{Binding DataContext.SendMessageCommand, ElementName=SendButton}">
                         发送
                     </Button>
                 </Grid>
@@ -123,7 +124,7 @@
                 <Button
                     x:Name="ConnectButton"
                     VerticalAlignment="Top"
-                    Command="{x:Bind viewModel.ConnectCommand}">
+                    Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
                     连接服务器
                 </Button>
             </Grid>

@@ -1,7 +1,11 @@
-﻿using ChatRoom.Client.Core.Network;
+﻿using ChatRoom.Client.Core.Common;
+using ChatRoom.Client.Core.Network;
 using ChatRoom.Client.Function.ChatRoom;
+using ChatRoom.Client.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Serilog;
+using Serilog.Core;
 using System;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -34,10 +38,35 @@ namespace ChatRoom.Client
         {
             var services = new ServiceCollection();
 
-            // 注册服务
+            //日志服务
+            services.AddSingleton<ILogger>(_ => 
+            {
+                return new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("logs/chatclient.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+            });
+
+            //UI层服务
             services.AddSingleton<IChatClientService, ChatClientService>();
             services.AddSingleton<IChatRoomService, ChatRoomService>();
-            services.AddTransient<MainWindow>();
+            services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<MainWindow>(sp => 
+            {
+                var window = new MainWindow();
+                if (window.Content is FrameworkElement frameworkElement)
+                {
+                    frameworkElement.DataContext = sp.GetRequiredService<MainWindowViewModel>();
+                }
+                return window;
+            });
+
+            //核心网络服务
+            services.AddSingleton<IChatClientCoreService, ChatClientCoreService>();
+            services.AddSingleton<IChatClientAPIService, ChatClientAPIService>();
+            services.AddSingleton<IChatClientEventService, ChatClientEventService>();
+            services.AddSingleton<IChatClientConfigService, ChatClientConfigService>();
 
             return services.BuildServiceProvider();
         }

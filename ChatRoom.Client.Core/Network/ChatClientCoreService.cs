@@ -1,70 +1,48 @@
 ﻿using ChatRoom.Client.Core.Common;
 using ChatRoom.Client.Core.Network.MessageBag;
 using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 using Serilog;
 
 namespace ChatRoom.Client.Core.Network
 {
-    internal interface IChatClientCoreService : IDisposable
+    public class ChatClientCoreService : IChatClientCoreService
     {
-        public Task ConnectAsync(ChatClientConfig chatClientConfig);
-        public void StartReceive();
-        public Task SendMessageAsync(string message);
+        private TcpClient tcpClient;
 
-        public delegate void OnEventReceivedHandler(EventMessageBag messageBag);
-        public event OnEventReceivedHandler OnEventReceived;
-
-        public delegate void OnResponseReceivedHandler(ResponseMessageBag messageBag);
-        public event OnResponseReceivedHandler OnResponseReceived;
-    }
-
-    internal class ChatClientCoreService : IChatClientCoreService
-    {
-        private TcpClient _tcpClient;
+        private ILogger logger;
 
         public event IChatClientCoreService.OnEventReceivedHandler? OnEventReceived;
         public event IChatClientCoreService.OnResponseReceivedHandler? OnResponseReceived;
 
-        public ChatClientCoreService()
+        public ChatClientCoreService(ILogger logger)
         {
-            _tcpClient = new TcpClient();
-
-            //初始化日志记录器
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .WriteTo.File("logs/chatclient.log", rollingInterval: RollingInterval.Day)
-                .CreateLogger();
+            tcpClient = new TcpClient();
+            this.logger = logger;
         }
 
         public async Task ConnectAsync(ChatClientConfig chatClientConfig)
         {
-            if (!_tcpClient.Connected)
+            if (!tcpClient.Connected)
             {
-                await _tcpClient.ConnectAsync(chatClientConfig.ServerIp, chatClientConfig.ServerPort);
+                await tcpClient.ConnectAsync(chatClientConfig.ServerIp, chatClientConfig.ServerPort);
             }
         }
 
         public async Task SendMessageAsync(string message)
         {
-            if (!_tcpClient.Connected)
+            if (!tcpClient.Connected)
                 return;
 
-            NetworkStream stream = _tcpClient.GetStream();
+            NetworkStream stream = tcpClient.GetStream();
             byte[] buffer = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(buffer, 0, buffer.Length);
         }
 
         public void StartReceive()
         {
-            if (!_tcpClient.Connected)
+            if (!tcpClient.Connected)
                 return;
 
             Task.Run(() => Receive());
@@ -72,7 +50,7 @@ namespace ChatRoom.Client.Core.Network
 
         private async void Receive()
         {
-            NetworkStream stream = _tcpClient.GetStream();
+            NetworkStream stream = tcpClient.GetStream();
             byte[] buffer = new byte[1024];
             while (true)
             {

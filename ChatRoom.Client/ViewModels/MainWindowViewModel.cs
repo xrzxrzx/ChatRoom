@@ -25,9 +25,9 @@ namespace ChatRoom.Client.ViewModels
 
         private readonly IChatRoomService chatRoomService;
 
-        public MainWindowViewModel(IServiceProvider serviceProvider)
+        public MainWindowViewModel(IChatRoomService chatRoomService)
         {
-            chatRoomService = serviceProvider.GetRequiredService<IChatRoomService>();
+            this.chatRoomService = chatRoomService;
         }
 
         [RelayCommand]

@@ -10,19 +10,7 @@ using Windows.System.UserProfile;
 
 namespace ChatRoom.Client.Function.ChatRoom
 {
-    internal interface IChatRoomService : IDisposable
-    {
-        void ConnectToServer();
-        void DisconnectToServer();
-        Task SendMessageAsync(string message);
-        Task LogInAsync(string user_id, string password);
-        Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
-
-        public delegate void OutputMessageDelegate(OutputMessageInfo outputMessage);
-        public event OutputMessageDelegate? OutputMessage;
-    }
-
-    internal class ChatRoomService : IChatRoomService
+    public class ChatRoomService : IChatRoomService
     {
         private IChatClientService _chatClientService;
         private UserInfo _userInfo;
@@ -85,7 +73,7 @@ namespace ChatRoom.Client.Function.ChatRoom
         }
     }
 
-    internal class OutputMessageInfo
+    public class OutputMessageInfo
     {
         public enum MessageSenderType
         {

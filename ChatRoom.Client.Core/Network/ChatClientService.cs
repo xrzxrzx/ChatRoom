@@ -8,53 +8,27 @@ using System.Threading.Tasks;
 
 namespace ChatRoom.Client.Core.Network
 {
-    public interface IChatClientService : IDisposable
-    {
-        public Task ConnectAsync();
-        public void StartReceiving();
-        public Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
-        public void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag;
-    }
-
     public class ChatClientService : IChatClientService
     {
-        private readonly IServiceProvider _serviceProvider;
-
         private readonly IChatClientCoreService _coreService;
         private readonly IChatClientAPIService _apiService;
         private readonly IChatClientEventService _eventService;
 
         private readonly IChatClientConfigService _configService;
 
-        public ChatClientService()
+        public ChatClientService(IChatClientCoreService chatClientCoreService, IChatClientAPIService chatClientAPIService, IChatClientEventService chatClientEventService, IChatClientConfigService chatClientConfigService)
         {
-            _serviceProvider = ConfigureServices();
-
             //核心服务
-            _coreService = _serviceProvider.GetRequiredService<IChatClientCoreService>();
-            _apiService = _serviceProvider.GetRequiredService<IChatClientAPIService>();
-            _eventService = _serviceProvider.GetRequiredService<IChatClientEventService>();
+            _coreService = chatClientCoreService;
+            _apiService = chatClientAPIService;
+            _eventService = chatClientEventService;
 
             //配置服务
-            _configService = _serviceProvider.GetRequiredService<IChatClientConfigService>();
+            _configService = chatClientConfigService;
 
             _coreService.OnEventReceived += _eventService.OnEventReceived;
             _coreService.OnResponseReceived += _apiService.OnResponseReceived;
             _apiService.SendMessageAsync += _coreService.SendMessageAsync;
-        }
-
-        private IServiceProvider ConfigureServices()
-        {
-            var services = new ServiceCollection();
-
-            // 注册服务
-            services.AddSingleton<IChatClientCoreService, ChatClientCoreService>();
-            services.AddSingleton<IChatClientAPIService, ChatClientAPIService>();
-            services.AddSingleton<IChatClientEventService, ChatClientEventService>();
-
-            services.AddSingleton<IChatClientConfigService, ChatClientConfigService>();
-
-            return services.BuildServiceProvider();
         }
 
         public async Task ConnectAsync()

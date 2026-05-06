@@ -5,14 +5,7 @@ using System.Threading.Channels;
 
 namespace ChatRoom.Client.Core.Network
 {
-    internal interface IChatClientEventService : IDisposable
-    {
-        public void OnEventReceived(EventMessageBag messageBag);
-        public void StartHandleEvents();
-        public void Subscribe<T>(Action<T> handler) where T : EventMessageBag;
-    }
-
-    internal class ChatClientEventService : IChatClientEventService
+    public class ChatClientEventService : IChatClientEventService
     {
         ChatClientEventBus eventBus;
 

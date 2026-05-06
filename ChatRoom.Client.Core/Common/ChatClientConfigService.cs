@@ -5,13 +5,7 @@ using YamlDotNet.Serialization;
 
 namespace ChatRoom.Client.Core.Common
 {
-    internal interface IChatClientConfigService : IDisposable
-    {
-        public ChatClientConfig GetConfig();
-        public void SetConfig(ChatClientConfig config);
-    }
-
-    internal class ChatClientConfigService : IChatClientConfigService
+    public class ChatClientConfigService : IChatClientConfigService
     {
         private readonly string _configFilePath = "ChatClient.yaml";
 
