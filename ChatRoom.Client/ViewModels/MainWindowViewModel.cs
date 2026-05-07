@@ -1,6 +1,7 @@
 ﻿using ChatRoom.Client.Core.Network;
 using ChatRoom.Client.Function.ChatRoom;
 using ChatRoom.Client.Models;
+using ChatRoom.Client.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,12 +24,52 @@ namespace ChatRoom.Client.ViewModels
         [ObservableProperty]
         public partial string InputMessage { get; set; } = string.Empty;
 
+        [ObservableProperty]
+        public partial int UserId { get; set; } = 0;
+
+        [ObservableProperty]
+        public partial string NickName { get; set; } = "未登录";
+
         private readonly IChatRoomService chatRoomService;
 
         public MainWindowViewModel(IChatRoomService chatRoomService)
         {
             this.chatRoomService = chatRoomService;
             this.chatRoomService.OutputMessage += OnMessageReceived;
+        }
+
+        [RelayCommand]
+        private async Task LoginAsync(string logType)
+        {
+            var loginWindow = App.Current.ServiceProvider.GetRequiredService<LoginWindow>();
+            loginWindow.SetLogType(logType);
+
+            // 监听 LoginWindow 的 Closed 事件来恢复 MainWindow 可用性
+            loginWindow.Closed += (s, e) =>
+            {
+                if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Control control)
+                {
+                    control.IsEnabled = true;
+                }
+                else if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Panel panel)
+                {
+                    panel.IsHitTestVisible = true;
+                    panel.Opacity = 1.0;
+                }
+            };
+
+            // 禁用 MainWindow 的内容
+            if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Control contentControl)
+            {
+                contentControl.IsEnabled = false;
+            }
+            else if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Panel contentPanel)
+            {
+                contentPanel.IsHitTestVisible = false;
+                contentPanel.Opacity = 0.5; // 半透明化以提示不可用
+            }
+
+            loginWindow.Activate();
         }
 
         [RelayCommand]

@@ -12,31 +12,31 @@ namespace ChatRoom.Client.Function.ChatRoom
 {
     public class ChatRoomService : IChatRoomService
     {
-        private IChatClientService _chatClientService;
-        private UserInfo _userInfo;
+        private IChatClientService chatClientService;
+        private UserInfo userInfo;
 
         public event IChatRoomService.OutputMessageDelegate? OutputMessage;
 
         public ChatRoomService(IChatClientService chatClientService, ILogger logger)
         {
-            _chatClientService = chatClientService;
-            _userInfo = new UserInfo();
+            this.chatClientService = chatClientService;
+            userInfo = new UserInfo();
 
             ChatRoomFunction.SetLogger(logger);
             ChatRoomFunction.SetOutputMessageDelegate(message => OutputMessage?.Invoke(message));
 
-            _chatClientService.SubscribeToEvent<MessageEvent>(ChatRoomFunction.OutputMessage);
+            this.chatClientService.SubscribeToEvent<MessageEvent>(ChatRoomFunction.OutputMessage);
         }
 
         public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
         {
-            return await _chatClientService.CallAPIAsync(apiName, parameters);
+            return await chatClientService.CallAPIAsync(apiName, parameters);
         }
 
         public async void ConnectToServer()
         {
-            await _chatClientService.ConnectAsync();
-            _chatClientService.StartReceiving();
+            await chatClientService.ConnectAsync();
+            chatClientService.StartReceiving();
         }
 
         public void DisconnectToServer()
@@ -46,30 +46,30 @@ namespace ChatRoom.Client.Function.ChatRoom
 
         public async Task LogUpAsync(string user_id, string password, string nickname)
         {
-            var response = await _chatClientService.CallAPIAsync("register", new APIParameter("user_id", user_id),
+            var response = await chatClientService.CallAPIAsync("register", new APIParameter("user_id", user_id),
                                                      new APIParameter("password", password),
                                                      new APIParameter("nickname", nickname));
             if (response.Success == false)
             {
                 OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"注册失败: {response.ErrorMessage}"));
             }
-            _userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
+            userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         }
 
         public async Task LogInAsync(string user_id, string password)
         {
-            var response = await _chatClientService.CallAPIAsync("login", new APIParameter("user_id", user_id),
+            var response = await chatClientService.CallAPIAsync("login", new APIParameter("user_id", user_id),
                                                      new APIParameter("password", password));
             if (response.Success == false)
             {
                 OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"登陆失败: {response.ErrorMessage}"));
             }
-            _userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
+            userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         }
 
         public async Task SendMessageAsync(string message)
         {
-            var response = await _chatClientService.CallAPIAsync("send_message", new APIParameter("sender", _userInfo.Id),
+            var response = await chatClientService.CallAPIAsync("send_message", new APIParameter("sender", userInfo.Id),
                                                      new APIParameter("message", message));
 
             if (response.Success == false)
@@ -85,6 +85,16 @@ namespace ChatRoom.Client.Function.ChatRoom
         public void Dispose()
         {
             throw new NotImplementedException();
+        }
+
+        public int GetUserId()
+        {
+            return userInfo.Id;
+        }
+
+        public string GetNickName()
+        {
+            return userInfo.NickName;
         }
     }
 

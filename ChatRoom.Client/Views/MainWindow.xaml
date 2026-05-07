@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Window
-    x:Class="ChatRoom.Client.MainWindow"
+    x:Class="ChatRoom.Client.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="using:ChatRoom.Client.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:ChatRoom.Client"
+    xmlns:local="using:ChatRoom.Client.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:ChatRoom.Client.Models"
     xmlns:viewmodel="using:ChatRoom.Client.ViewModels"
@@ -45,10 +45,27 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Spacing="12">
-                    <Grid>
-                        <PersonPicture />
-                        <TextBlock>123</TextBlock>
-                        <TextBlock>123</TextBlock>
+                    <Grid ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+
+                        <PersonPicture
+                            Grid.Column="0"
+                            Width="50"
+                            DisplayName="{Binding NickName}" />
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock
+                                FontSize="18"
+                                FontWeight="Bold"
+                                Text="{Binding NickName}" />
+                            <TextBlock
+                                FontSize="14"
+                                Foreground="CadetBlue"
+                                Text="{Binding UserId}" />
+                        </StackPanel>
                     </Grid>
 
                     <Button
@@ -65,17 +82,19 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Button
-                            x:Name="ConnectButton2"
+                            x:Name="RegisterButton"
                             Grid.Column="0"
                             HorizontalAlignment="Stretch"
-                            Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
+                            Command="{Binding DataContext.LoginCommand, ElementName=RegisterButton}"
+                            CommandParameter="Register">
                             注册
                         </Button>
                         <Button
-                            x:Name="ConnectButton3"
+                            x:Name="LoginButton"
                             Grid.Column="2"
                             HorizontalAlignment="Stretch"
-                            Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
+                            Command="{Binding DataContext.LoginCommand, ElementName=LoginButton}"
+                            CommandParameter="Login">
                             登录
                         </Button>
                     </Grid>

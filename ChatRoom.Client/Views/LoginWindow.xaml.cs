@@ -1,10 +1,9 @@
+using ChatRoom.Client.Views.LoginWindowPages;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using System;
-using ChatRoom.Client.Core.Network;
-using Newtonsoft.Json.Linq;
-using ChatRoom.Client.ViewModels;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using Windows.UI.ApplicationSettings;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -14,9 +13,9 @@ namespace ChatRoom.Client.Views
     /// <summary>
     /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class LoginWindow : Window
     {
-        public MainWindow()
+        public LoginWindow()
         {
             InitializeComponent();
 
@@ -25,13 +24,13 @@ namespace ChatRoom.Client.Views
             // XamlRoot.RasterizationScale 需要在 UI 内容加载后才能获取，不使用 DLL 则必须依赖事件
             if (Content is FrameworkElement rootElement)
             {
-                rootElement.Loaded += (s, e) => SetLogicalSize(800, 650);
+                rootElement.Loaded += (s, e) => 
+                {
+                    SetLogicalSize(350, 500);
+                };
             }
         }
 
-        /// <summary>
-        /// 通过 WinUI 3 原生 XamlRoot 获取显示器缩放系数并设置窗口的逻辑大小
-        /// </summary>
         private void SetLogicalSize(double logicalWidth, double logicalHeight)
         {
             if (Content?.XamlRoot is XamlRoot xamlRoot)
@@ -43,6 +42,32 @@ namespace ChatRoom.Client.Views
                 int pixelHeight = (int)Math.Round(logicalHeight * scale);
 
                 AppWindow.Resize(new Windows.Graphics.SizeInt32(pixelWidth, pixelHeight));
+            }
+        }
+
+        private void RootNavigation_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        {
+            if (args.InvokedItemContainer is NavigationViewItem item && item.Tag != null)
+            {
+                Type pageType = item.Tag switch
+                {
+                    "LoginPage" => typeof(LoginPage),
+                    "RegisterPage" => typeof(RegisterPage),
+                    _ => throw new ArgumentException("未定义的页面类型：" + item.Tag)
+                };
+                contentFrame.Navigate(pageType);
+            }
+        }
+
+        internal void SetLogType(string logType)
+        {
+            if(logType == "Login")
+            {
+                contentFrame.Navigate(typeof(LoginPage));
+            }
+            else if(logType == "Register")
+            {
+                contentFrame.Navigate(typeof(RegisterPage));
             }
         }
     }

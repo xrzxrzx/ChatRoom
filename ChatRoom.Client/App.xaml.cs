@@ -2,6 +2,7 @@
 using ChatRoom.Client.Core.Network;
 using ChatRoom.Client.Function.ChatRoom;
 using ChatRoom.Client.ViewModels;
+using ChatRoom.Client.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Serilog;
@@ -18,9 +19,10 @@ namespace ChatRoom.Client
     /// </summary>
     public partial class App : Application
     {
-        private Window? _window;
+        private MainWindow? _window;
+        public MainWindow MainWindow => _window ?? throw new InvalidOperationException("Main window is not initialized.");
 
-        private readonly IServiceProvider _serviceProvider;
+        public readonly IServiceProvider ServiceProvider;
         public new static App Current => (App)Application.Current;
 
         /// <summary>
@@ -29,7 +31,7 @@ namespace ChatRoom.Client
         /// </summary>
         public App()
         {
-            _serviceProvider = ConfigureServices();
+            ServiceProvider = ConfigureServices();
 
             InitializeComponent();
         }
@@ -51,13 +53,25 @@ namespace ChatRoom.Client
             //UI层服务
             services.AddSingleton<IChatClientService, ChatClientService>();
             services.AddSingleton<IChatRoomService, ChatRoomService>();
+
+            //ViewModel和View
             services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<LoginWindowViewModel>();
             services.AddTransient<MainWindow>(sp => 
             {
                 var window = new MainWindow();
                 if (window.Content is FrameworkElement frameworkElement)
                 {
                     frameworkElement.DataContext = sp.GetRequiredService<MainWindowViewModel>();
+                }
+                return window;
+            });
+            services.AddTransient<LoginWindow>(sp => 
+            {
+                var window = new LoginWindow();
+                if (window.Content is FrameworkElement frameworkElement)
+                {
+                    frameworkElement.DataContext = sp.GetRequiredService<LoginWindowViewModel>();
                 }
                 return window;
             });
@@ -77,7 +91,7 @@ namespace ChatRoom.Client
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            _window = _serviceProvider.GetService<MainWindow>();
+            _window = ServiceProvider.GetService<MainWindow>();
             if (_window == null)
             {
                 throw new InvalidOperationException("Failed to create the main window.");

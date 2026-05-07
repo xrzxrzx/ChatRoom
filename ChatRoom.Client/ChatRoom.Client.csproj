@@ -13,6 +13,10 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Views\LoginWindow.xaml" />
+    <None Remove="Views\LoginWindowPages\LoginPage.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -45,10 +49,32 @@
     <PackageReference Include="Serilog" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Views\" />
+    <ProjectReference Include="..\ChatRoom.Client.Core\ChatRoom.Client.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ChatRoom.Client.Core\ChatRoom.Client.Core.csproj" />
+    <Page Update="Views\LoginWindowPages\RegisterPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\LoginWindow\LogupPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\LoginWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\LoginWindow\LoginPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\LoginWindowPages\LoginPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--

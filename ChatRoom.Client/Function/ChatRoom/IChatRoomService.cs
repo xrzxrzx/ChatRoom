@@ -9,6 +9,8 @@ namespace ChatRoom.Client.Function.ChatRoom
 {
     public interface IChatRoomService : IDisposable
     {
+        int GetUserId();
+        string GetNickName();
         void ConnectToServer();
         void DisconnectToServer();
         Task SendMessageAsync(string message);
