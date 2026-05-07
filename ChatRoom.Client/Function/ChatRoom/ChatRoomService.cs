@@ -44,7 +44,7 @@ namespace ChatRoom.Client.Function.ChatRoom
             throw new NotImplementedException();
         }
 
-        public async Task LogUpAsync(string user_id, string password, string nickname)
+        public async Task<bool> RegisterAsync(string user_id, string password, string nickname)
         {
             var response = await chatClientService.CallAPIAsync("register", new APIParameter("user_id", user_id),
                                                      new APIParameter("password", password),
@@ -52,19 +52,25 @@ namespace ChatRoom.Client.Function.ChatRoom
             if (response.Success == false)
             {
                 OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"注册失败: {response.ErrorMessage}"));
+                return false;
             }
             userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
+            userInfo.NickName = nickname;
+            return true;
         }
 
-        public async Task LogInAsync(string user_id, string password)
+        public async Task<bool> LogInAsync(int userId, string password)
         {
-            var response = await chatClientService.CallAPIAsync("login", new APIParameter("user_id", user_id),
+            var response = await chatClientService.CallAPIAsync("login", new APIParameter("user_id", userId),
                                                      new APIParameter("password", password));
             if (response.Success == false)
             {
                 OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"登陆失败: {response.ErrorMessage}"));
+                return false;
             }
             userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
+            userInfo.NickName = response.Data["nickname"]?.Value<string>() ?? string.Empty;
+            return true;
         }
 
         public async Task SendMessageAsync(string message)

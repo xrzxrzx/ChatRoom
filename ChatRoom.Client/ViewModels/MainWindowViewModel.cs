@@ -4,6 +4,8 @@ using ChatRoom.Client.Models;
 using ChatRoom.Client.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -13,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace ChatRoom.Client.ViewModels
 {
-    public partial class MainWindowViewModel : ObservableObject
+    public partial class MainWindowViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>
     {
         [ObservableProperty]
         public partial ObservableCollection<MessageInfo> MessageInfoList { get; set; } = new ObservableCollection<MessageInfo>();
@@ -36,6 +38,8 @@ namespace ChatRoom.Client.ViewModels
         {
             this.chatRoomService = chatRoomService;
             this.chatRoomService.OutputMessage += OnMessageReceived;
+
+            IsActive = true;
         }
 
         [RelayCommand]
@@ -103,6 +107,23 @@ namespace ChatRoom.Client.ViewModels
             };
 
             MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, senderName, message.Content));
+        }
+
+        public void Receive(ValueChangedMessage<string> message)
+        {
+            if (message.Value == "登录成功")
+            {
+                UserId = chatRoomService.GetUserId();
+                NickName = chatRoomService.GetNickName();
+                MessageInfoList.Add(new MessageInfo(message.Value));
+                
+            }
+            else if (message.Value == "注册成功")
+            {
+                UserId = chatRoomService.GetUserId();
+                NickName = chatRoomService.GetNickName();
+                MessageInfoList.Add(new MessageInfo(message.Value));
+            }
         }
     }
 }

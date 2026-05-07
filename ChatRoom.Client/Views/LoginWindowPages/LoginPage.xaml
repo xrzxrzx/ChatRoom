@@ -20,9 +20,18 @@
             FontWeight="Bold"
             Text="登录" />
         <TextBlock Text="账号" />
-        <TextBox x:Name="AccountTextBox" PlaceholderText="请输入账号" />
+        <TextBox
+            x:Name="AccountTextBox"
+            PlaceholderText="请输入账号"
+            Text="{Binding UserId, Mode=TwoWay}" />
         <TextBlock Text="密码" />
-        <TextBox x:Name="PasswordTextBox" PlaceholderText="请输入密码" />
-        <Button HorizontalAlignment="Stretch" Content="登录" />
+        <TextBox
+            x:Name="PasswordTextBox"
+            PlaceholderText="请输入密码"
+            Text="{Binding Password, Mode=TwoWay}" />
+        <Button
+            HorizontalAlignment="Stretch"
+            Command="{Binding LoginCommand}"
+            Content="登录" />
     </StackPanel>
 </Page>

@@ -153,13 +153,13 @@
                                     Foreground="{Binding SenderType, Converter={StaticResource NickNameToColorConverter}}"
                                     Text="{x:Bind SenderNickName}" />
 
+                                <!--  为了圆角背景套一层Grid  -->
                                 <Grid
                                     Grid.Row="1"
                                     Padding="4"
                                     Background="{Binding SenderType, Converter={StaticResource NickNameToColorConverter}}"
                                     CornerRadius="3">
                                     <TextBlock
-                                        Grid.Row="1"
                                         HorizontalAlignment="{Binding SenderType, Converter={StaticResource NickNameToAlignmentConverter}}"
                                         Text="{x:Bind Message}"
                                         TextWrapping="Wrap" />
