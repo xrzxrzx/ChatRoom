@@ -13,51 +13,57 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\Server">
+      <UniqueIdentifier>{2732cc08-8e5d-4665-b7c8-73f967fa96b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Server">
+      <UniqueIdentifier>{97364d43-b225-4387-90ab-aa915c403421}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="UserSession.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="ChatRoomException.cpp">
+      <Filter>源文件\Server</Filter>
     </ClCompile>
     <ClCompile Include="ChatServer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ServerMessageBag.cpp">
-      <Filter>源文件</Filter>
+      <Filter>源文件\Server</Filter>
     </ClCompile>
     <ClCompile Include="ClientMessageBag.cpp">
-      <Filter>源文件</Filter>
+      <Filter>源文件\Server</Filter>
     </ClCompile>
     <ClCompile Include="CoreService.cpp">
-      <Filter>源文件</Filter>
+      <Filter>源文件\Server</Filter>
     </ClCompile>
-    <ClCompile Include="ChatRoomException.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="ServerMessageBag.cpp">
+      <Filter>源文件\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="UserSession.cpp">
+      <Filter>源文件\Server</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="UserSession.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="ChatRoomException.h">
+      <Filter>头文件\Server</Filter>
     </ClInclude>
     <ClInclude Include="ChatServer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ServerMessageBag.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\Server</Filter>
     </ClInclude>
     <ClInclude Include="ClientMessageBag.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\Server</Filter>
     </ClInclude>
     <ClInclude Include="CoreService.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\Server</Filter>
     </ClInclude>
-    <ClInclude Include="ChatRoomException.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="ServerMessageBag.h">
+      <Filter>头文件\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="UserSession.h">
+      <Filter>头文件\Server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

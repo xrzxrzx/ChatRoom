@@ -11,7 +11,6 @@
     mc:Ignorable="d">
 
     <StackPanel
-        Grid.Row="1"
         Padding="12"
         d:DataContext="{d:DesignInstance Type=viewmodel:LoginWindowViewModel}"
         Spacing="12">

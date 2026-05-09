@@ -73,6 +73,17 @@ namespace ChatRoom.Client.Function.ChatRoom
             return true;
         }
 
+        public async Task<bool> JoinRoomAsync(int roomId)
+        {
+            var response = await chatClientService.CallAPIAsync("join_room", new APIParameter("room_id", roomId));
+            if (response.Success == false)
+            {
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"加入房间失败: {response.ErrorMessage}"));
+                return false;
+            }
+            return true;
+        }
+
         public async Task SendMessageAsync(string message)
         {
             var response = await chatClientService.CallAPIAsync("send_message", new APIParameter("sender", userInfo.Id),
@@ -101,6 +112,11 @@ namespace ChatRoom.Client.Function.ChatRoom
         public string GetNickName()
         {
             return userInfo.NickName;
+        }
+
+        public Task<List<RoomInfo>> GetRoomListAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 

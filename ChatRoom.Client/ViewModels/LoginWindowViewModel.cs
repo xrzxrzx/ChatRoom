@@ -40,8 +40,14 @@ namespace ChatRoom.Client.ViewModels
         }
 
         [RelayCommand]
-        private void RegisterAsync()
+        private async Task RegisterAsync()
         {
+            //var result = await chatRoomService.RegisterAsync(UserId, Password);
+            var result = true;
+            if(result)
+            {
+                WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("注册成功"));
+            }
         }
     }
 }

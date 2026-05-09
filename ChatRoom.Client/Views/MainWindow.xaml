@@ -69,7 +69,7 @@
                     </Grid>
 
                     <Button
-                        x:Name="ConnectButton1"
+                        x:Name="ConnectButton"
                         HorizontalAlignment="Stretch"
                         Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
                         连接服务器
@@ -85,7 +85,7 @@
                             x:Name="RegisterButton"
                             Grid.Column="0"
                             HorizontalAlignment="Stretch"
-                            Command="{Binding DataContext.LoginCommand, ElementName=RegisterButton}"
+                            Command="{Binding LoginCommand}"
                             CommandParameter="Register">
                             注册
                         </Button>
@@ -93,16 +93,16 @@
                             x:Name="LoginButton"
                             Grid.Column="2"
                             HorizontalAlignment="Stretch"
-                            Command="{Binding DataContext.LoginCommand, ElementName=LoginButton}"
+                            Command="{Binding LoginCommand}"
                             CommandParameter="Login">
                             登录
                         </Button>
                     </Grid>
 
                     <Button
-                        x:Name="ConnectButton"
+                        x:Name="LogoutButton"
                         HorizontalAlignment="Stretch"
-                        Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
+                        Command="{Binding LogoutCommand}">
                         退出登录
                     </Button>
                 </StackPanel>
@@ -132,9 +132,9 @@
                     BorderBrush="Gray"
                     BorderThickness="1"
                     CornerRadius="5"
-                    ItemsSource="{Binding DataContext.MessageInfoList, ElementName=ChatListView}"
+                    ItemsSource="{Binding MessageInfoList}"
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    SelectedItem="{Binding DataContext.SelectedMessage, ElementName=ChatListView, Mode=TwoWay}">
+                    SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:MessageInfo">
                             <Grid
@@ -186,11 +186,11 @@
                     <TextBox
                         x:Name="MessageTextBox"
                         Grid.Column="0"
-                        Text="{Binding DataContext.InputMessage, ElementName=MessageTextBox, Mode=TwoWay}" />
+                        Text="{Binding InputMessage, Mode=TwoWay}" />
                     <Button
                         x:Name="SendButton"
                         Grid.Column="1"
-                        Command="{Binding DataContext.SendMessageCommand, ElementName=SendButton}">
+                        Command="{Binding SendMessageCommand}">
                         发送
                     </Button>
                 </Grid>

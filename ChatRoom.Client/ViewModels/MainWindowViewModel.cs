@@ -20,6 +20,8 @@ namespace ChatRoom.Client.ViewModels
         [ObservableProperty]
         public partial ObservableCollection<MessageInfo> MessageInfoList { get; set; } = new ObservableCollection<MessageInfo>();
 
+        public ObservableCollection<RoomInfo> RoomInfoList { get; set; } = new ObservableCollection<RoomInfo>();
+
         [ObservableProperty]
         public partial MessageInfo SelectedMessage { get; set; } = new MessageInfo(0, string.Empty, string.Empty);
 
@@ -109,20 +111,31 @@ namespace ChatRoom.Client.ViewModels
             MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, senderName, message.Content));
         }
 
-        public void Receive(ValueChangedMessage<string> message)
+        public async void Receive(ValueChangedMessage<string> message)
         {
             if (message.Value == "登录成功")
             {
                 UserId = chatRoomService.GetUserId();
                 NickName = chatRoomService.GetNickName();
                 MessageInfoList.Add(new MessageInfo(message.Value));
-                
+                RoomInfoList.Clear();
+                var rooms = await chatRoomService.GetRoomListAsync();
+                foreach (var room in rooms)
+                {
+                    RoomInfoList.Add(room);
+                }
             }
             else if (message.Value == "注册成功")
             {
                 UserId = chatRoomService.GetUserId();
                 NickName = chatRoomService.GetNickName();
                 MessageInfoList.Add(new MessageInfo(message.Value));
+                RoomInfoList.Clear();
+                var rooms = await chatRoomService.GetRoomListAsync();
+                foreach (var room in rooms)
+                {
+                    RoomInfoList.Add(room);
+                }
             }
         }
     }

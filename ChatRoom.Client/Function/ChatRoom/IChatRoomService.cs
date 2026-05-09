@@ -16,6 +16,8 @@ namespace ChatRoom.Client.Function.ChatRoom
         Task SendMessageAsync(string message);
         Task<bool> LogInAsync(int userId, string password);
         Task<bool> RegisterAsync(string userId, string password, string nickname);
+        Task<bool> JoinRoomAsync(int roomId);
+        Task<List<RoomInfo>> GetRoomListAsync();
         Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
 
         public delegate void OutputMessageDelegate(OutputMessageInfo outputMessage);
