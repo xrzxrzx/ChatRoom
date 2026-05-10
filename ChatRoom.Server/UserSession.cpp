@@ -1,124 +1,86 @@
 #include "UserSession.h"
-#include"ChatRoomException.h"
-#include <iostream>
 
-using std::cout;
-using std::endl;
+#include<spdlog/spdlog.h>
+#include<nlohmann/json.hpp>
+#include"APIMessageBag.h"
+#include"EventMessageBag.h"
 
-void UserSession::Start()
+namespace asio = boost::asio;
+using APIMessageBag::ResquestBag;
+using APIMessageBag::ResponseBag;
+
+void UserSession::Init()
 {
-	do_recvive();
-}
-
-void UserSession::do_recvive()
-{
-	auto self(shared_from_this());
-
-	asio::async_read_until(_socket, _buffer, "\n",
-		[this, self](const boost::system::error_code& error, std::size_t length)
+	asio::async_read_until(socket, readBuffer, '\n',
+		[this](boost::system::error_code ec, std::size_t bytes_transferred)
 		{
-			if (!error)
+			if (!ec)
 			{
-				std::istream is(&_buffer);
-				std::string message;
-				std::getline(is, message);
-				
-				//接收消息处理
-				OnMessageReceived(message);
-
-				do_recvive();
-			}
-			else
-			{
-				cout << "错误: " << error.message() << endl;
-			}
-		});
-}
-
-void UserSession::do_send(const std::string& message)
-{
-	auto self(shared_from_this());
-
-	asio::async_write(_socket, asio::buffer(message + "\n"),
-		[this, self](const boost::system::error_code& error, std::size_t length)
-		{
-			if (!error)
-			{
-				_messageQueue.pop();
-				if (!_messageQueue.empty())
+				std::istream is(&readBuffer);
+				string line;
+				std::getline(is, line);
+				ResquestBag requestBag(line);
+				if (requestBag.GetAction() == "login")
 				{
-					do_send(_messageQueue.front());
+					spdlog::info("用户请求登录");
+					// TODO : 处理登录逻辑，获取用户信息后加入聊天室
+				}
+				else
+				{
+					// TODO : 处理其他接口调用，用户仅能调用一次 login 接口，否则会被服务器断开连接
 				}
 			}
 			else
 			{
-				cout << "错误: " << error.message() << endl;
+				spdlog::error("接收消息出错: {}", ec.message());
 			}
 		});
 }
 
-void UserSession::OnMessageReceived(const std::string& message)
+void UserSession::Deliver(const string& message)
 {
-	json responseData;
-	RequestBag requestBag(message);
-	ResponseBag responseBag(requestBag.GetEcho());
-
-	try
-	{
-		responseData = SwitchCommand(requestBag);
-	}
-	catch (const ChatRoomException::APITimeOutException& e)
-	{
-		responseBag.AddRecode(e.code(), e.what());
-	}
-	catch (const ChatRoomException::InvalidParameterException& e)
-	{
-		responseBag.AddRecode(e.code(), e.what());
-	}
-	catch (const std::exception& e)
-	{
-		cout << "未知错误: " << e.what() << endl;
-	}
-
-	responseBag.AddData("data", responseData["data"]);
-	SendMessageString(responseBag.ToJsonString());
-}
-
-//消息分拣
-json& UserSession::SwitchCommand(const ClientMessage::RequestBag& requestBag)
-{
-	using ClientMessage::CommandType;
-
-	json responseData;
-
-	switch (requestBag.GetCommand())
-	{
-	case CommandType::Message:
-		return _messageCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
-	case CommandType::Request:
-		return _requestCommandHandle(requestBag.GetEcho(), requestBag.GetParameters());
-	default:
-		static json default_json;
-		return default_json;
+	bool write_in_progress = !writeQueue.empty();
+	writeQueue.push(message);
+	if (!write_in_progress) {
+		do_write();
 	}
 }
 
-void UserSession::SendMessageString(const std::string& message)
+void UserSession::do_write()
 {
-	bool write_in_progress = !_messageQueue.empty();
-	_messageQueue.push(message);
-	if(!write_in_progress)
-	{
-		do_send(_messageQueue.front());
-	}
+	asio::async_write(socket, asio::buffer(writeQueue.front()),
+		[this](boost::system::error_code ec, std::size_t /*length*/)
+		{
+			if (!ec)
+			{
+				writeQueue.pop();
+				if (!writeQueue.empty()) {
+					do_write();
+				}
+			}
+			else
+			{
+				spdlog::error("发送消息出错: {}", ec.message());
+			}
+		});
 }
 
-void UserSession::SetMessageCommandHandle(std::function<json&(const std::string& echo, const json& params)> handle)
+void UserSession::do_read()
 {
-	_messageCommandHandle = handle;
-}
-
-void UserSession::SetRequestCommandHandle(std::function<json&(const std::string& echo, const json& params)> handle)
-{
-	_requestCommandHandle = handle;
+	asio::async_read_until(socket, readBuffer, '\n',
+		[this](boost::system::error_code ec, std::size_t bytes_transferred)
+		{
+			if (!ec)
+			{
+				std::istream is(&readBuffer);
+				string line;
+				std::getline(is, line);
+				ResquestBag requestBag(line);
+				// TODO : 处理用户发送的消息
+			}
+			else
+			{
+				spdlog::error("接收消息出错: {}", ec.message());
+			}
+		});
 }

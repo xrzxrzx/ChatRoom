@@ -13,57 +13,72 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\Server">
-      <UniqueIdentifier>{2732cc08-8e5d-4665-b7c8-73f967fa96b2}</UniqueIdentifier>
+    <Filter Include="third_party">
+      <UniqueIdentifier>{eb4f3ece-2b0e-440a-931a-000e71690960}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\Server">
-      <UniqueIdentifier>{97364d43-b225-4387-90ab-aa915c403421}</UniqueIdentifier>
+    <Filter Include="third_party\boost-ext.di">
+      <UniqueIdentifier>{0d030e1c-eff5-4955-ab06-05393a208ac0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\core">
+      <UniqueIdentifier>{101447c3-d96a-492f-861a-afe7bd162f6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\core">
+      <UniqueIdentifier>{500c0c90-0a2c-480d-9a92-22912284e148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\core\server_service">
+      <UniqueIdentifier>{95ce7aee-6bd5-4dd3-af01-d940047aecaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\core\server_service">
+      <UniqueIdentifier>{97387158-6bf3-4d1f-9a70-0b6ff6b091b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\core\server_service\message_bag">
+      <UniqueIdentifier>{56474ee5-d539-4824-bedb-0bbfba9e1dc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\core\server_service\message_bag">
+      <UniqueIdentifier>{cfe7f6ca-d732-4e15-8f52-0f75f30a49d8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ChatRoomException.cpp">
-      <Filter>源文件\Server</Filter>
+    <ClCompile Include="ChatServerService.cpp">
+      <Filter>源文件\core\server_service</Filter>
     </ClCompile>
-    <ClCompile Include="ChatServer.cpp">
-      <Filter>源文件\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="ClientMessageBag.cpp">
-      <Filter>源文件\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreService.cpp">
-      <Filter>源文件\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="ServerMessageBag.cpp">
-      <Filter>源文件\Server</Filter>
+    <ClCompile Include="ChatRoom.cpp">
+      <Filter>源文件\core\server_service</Filter>
     </ClCompile>
     <ClCompile Include="UserSession.cpp">
-      <Filter>源文件\Server</Filter>
+      <Filter>源文件\core\server_service</Filter>
+    </ClCompile>
+    <ClCompile Include="EventMessageBag.cpp">
+      <Filter>源文件\core\server_service\message_bag</Filter>
+    </ClCompile>
+    <ClCompile Include="APIMessageBag.cpp">
+      <Filter>源文件\core\server_service\message_bag</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChatRoomException.h">
-      <Filter>头文件\Server</Filter>
+    <ClInclude Include="di.hpp">
+      <Filter>third_party\boost-ext.di</Filter>
     </ClInclude>
-    <ClInclude Include="ChatServer.h">
-      <Filter>头文件\Server</Filter>
+    <ClInclude Include="ChatServerService.h">
+      <Filter>头文件\core\server_service</Filter>
     </ClInclude>
-    <ClInclude Include="ClientMessageBag.h">
-      <Filter>头文件\Server</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreService.h">
-      <Filter>头文件\Server</Filter>
-    </ClInclude>
-    <ClInclude Include="ServerMessageBag.h">
-      <Filter>头文件\Server</Filter>
+    <ClInclude Include="ChatRoom.h">
+      <Filter>头文件\core\server_service</Filter>
     </ClInclude>
     <ClInclude Include="UserSession.h">
-      <Filter>头文件\Server</Filter>
+      <Filter>头文件\core\server_service</Filter>
+    </ClInclude>
+    <ClInclude Include="EventMessageBag.h">
+      <Filter>头文件\core\server_service\message_bag</Filter>
+    </ClInclude>
+    <ClInclude Include="APIMessageBag.h">
+      <Filter>头文件\core\server_service\message_bag</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

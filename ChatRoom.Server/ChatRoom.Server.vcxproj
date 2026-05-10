@@ -127,23 +127,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ChatRoomException.cpp" />
-    <ClCompile Include="ChatServer.cpp" />
-    <ClCompile Include="ClientMessageBag.cpp" />
-    <ClCompile Include="CoreService.cpp" />
+    <ClCompile Include="APIMessageBag.cpp" />
+    <ClCompile Include="ChatRoom.cpp" />
+    <ClCompile Include="ChatServerService.cpp" />
+    <ClCompile Include="EventMessageBag.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="ServerMessageBag.cpp" />
     <ClCompile Include="UserSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChatRoomException.h" />
-    <ClInclude Include="ChatServer.h" />
-    <ClInclude Include="ClientMessageBag.h" />
-    <ClInclude Include="CoreService.h" />
-    <ClInclude Include="ServerMessageBag.h" />
+    <ClInclude Include="APIMessageBag.h" />
+    <ClInclude Include="ChatRoom.h" />
+    <ClInclude Include="ChatServerService.h" />
+    <ClInclude Include="di.hpp" />
+    <ClInclude Include="EventMessageBag.h" />
     <ClInclude Include="UserSession.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

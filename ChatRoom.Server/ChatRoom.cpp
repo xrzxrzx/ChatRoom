@@ -1,15 +1,11 @@
 #include "ChatRoom.h"
 
-ChatRoom::ChatRoom()
+void ChatRoom::AddParticipant(std::shared_ptr<UserSession> participant)
 {
+	participants.push_back(participant);
 }
 
-void ChatRoom::Join(const User& user)
+void ChatRoom::RemoveParticipant(std::shared_ptr<UserSession> participant)
 {
-	m_users.push_back(user);
-}
-
-void ChatRoom::Leave(const User& user)
-{
-	m_users.remove(user);
+	participants.erase(std::remove(participants.begin(), participants.end(), participant), participants.end());
 }

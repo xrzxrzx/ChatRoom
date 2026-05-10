@@ -1,43 +1,35 @@
 #pragma once
 
-#include <boost/asio.hpp>
-#include <queue>
-#include<nlohmann/json.hpp>
-#include<functional>
-#include"ServerMessageBag.h"
-#include"ClientMessageBag.h"
+#include<memory>
+#include<queue>
+#include<boost/asio.hpp>
+#include"ChatServerService.h"
+#include"ChatRoom.h"
 
-namespace asio = boost::asio;
-using tcp = asio::ip::tcp;
-using json = nlohmann::json;
-
-using ClientMessage::RequestBag;
-using ClientMessage::ResponseBag;
-using ServerMessage::ServerMessageBag;
+using std::queue;
+using boost::asio::ip::tcp;
 
 class UserSession : public std::enable_shared_from_this<UserSession>
 {
 public:
-	UserSession(tcp::socket socket) : _socket(std::move(socket)) {}
-	tcp::socket& Socket() { return _socket; }
-	void Start();
-	void SendMessageString(const std::string& message);
+	UserSession(boost::asio::ip::tcp::socket socket, ChatServerService& server) : socket(std::move(socket)), server(server) {}
 
-	void SetMessageCommandHandle(std::function<json&(const std::string& echo, const json& params)> handle);
-
-	void SetRequestCommandHandle(std::function<json&(const std::string& echo, const json& params)> handle);
+	/**
+	* 初始化新连接，需要等待客户端调用 login 接口，获取用户信息后才能加入聊天室，且用户仅能调用一次 login 接口，否则会被服务器断开连接
+	*/
+	void Init();
+	void Deliver(const string& message);
 
 private:
-	tcp::socket _socket;
-	asio::streambuf _buffer;
-	std::queue<std::string> _messageQueue;
+	tcp::socket socket;
+	boost::asio::streambuf readBuffer;
+	queue<string> writeQueue;
 
-	std::function<json&(const std::string& echo, const json& params)> _messageCommandHandle;
-	std::function<json&(const std::string& echo, const json& params)> _requestCommandHandle;
+	ChatRoom* currentChatRoom = nullptr;
+	ChatServerService& server;
+	friend class ChatServerService;
 
-	void do_recvive();
-	void do_send(const std::string& message);
-
-	void OnMessageReceived(const std::string& message);
-	json& SwitchCommand(const ClientMessage::RequestBag& requestBag);
+	void do_write();
+	void do_read();
 };
+
