@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# gRPC C++编译输出
+*.grpc.pb.h
+*.grpc.pb.cc
+*.pb.h
+*.pb.cc
+
 # User-specific files
 *.rsuser
 *.suo

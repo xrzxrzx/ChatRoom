@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package gRPCUserSession;
+
+service UserSessionService {
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc Logout (LogoutRequest) returns (LogoutResponse);
+  rpc GetSessionInfo (SessionInfoRequest) returns (SessionInfoResponse);
+  rpc RefreshSession (RefreshSessionRequest) returns (RefreshSessionResponse);
+  rpc ValidateSession (SessionInfoRequest) returns (SessionInfoResponse);
+}
+
+message RegisterRequest {
+    string nickname = 1;
+  string password = 2;
+}
+
+//客户端需根据token或许注册后的详细信息（user_id)
+message RegisterResponse {
+  bool success = 1;
+  string session_token = 2;
+}
+
+message LoginRequest {
+  int32 user_id = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string session_token = 1;
+  string nickname = 2;
+}
+
+message LogoutRequest {
+  string session_token = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+message SessionInfoRequest {
+  string session_token = 1;
+}
+
+//token验证失败时，返回user_id为-1，nickname为空字符串
+message SessionInfoResponse {
+  int32 user_id = 1;
+  string nickname = 2;
+}
+
+message RefreshSessionRequest {
+  string session_token = 1;
+}
+
+message RefreshSessionResponse {
+  string new_session_token = 1;
+}
