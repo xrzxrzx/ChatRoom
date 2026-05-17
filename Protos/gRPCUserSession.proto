@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package gRPCUserSession;
 
+option go_package = "../ChatRoom.Server.Models/Protos/gRPCUserSession";
+
 service UserSessionService {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);

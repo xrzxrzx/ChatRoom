@@ -9,6 +9,11 @@
 *.pb.h
 *.pb.cc
 
+# gRPC Golang编译输出
+*.pb.go
+
+Compile Protos.bat
+
 # User-specific files
 *.rsuser
 *.suo
