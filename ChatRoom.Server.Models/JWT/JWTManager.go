@@ -7,14 +7,14 @@ import (
 )
 
 type CustomClaims struct {
-	id int64
+	id int32
 	jwt.RegisteredClaims
 }
 
 // JWT秘钥
 var jwtSecret = []byte("your-secret-key-change-this")
 
-func GenerateToken(id int64) (string, error) {
+func GenerateToken(id int32) (string, error) {
 	claims := CustomClaims{
 		id: id,
 		RegisteredClaims: jwt.RegisteredClaims{

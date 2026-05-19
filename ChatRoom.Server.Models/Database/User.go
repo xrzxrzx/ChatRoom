@@ -1,12 +1,12 @@
 package Database
 
 type User struct {
-	Id       int64
+	Id       int32
 	Password string
 	Nickname string
 }
 
-func (user *User) GetUserById(id string) error {
+func (user *User) GetUserById(id int32) error {
 	query := "SELECT id, `password`, nickname\nFROM `user`\nWHERE id=?"
 	err := db.QueryRow(query, id).
 		Scan(&user.Id, &user.Password, &user.Nickname)
@@ -24,7 +24,8 @@ func (user *User) CreateUser(password string, nickname string) error {
 		return err
 	}
 
-	user.Id, _ = result.LastInsertId()
+	id, _ := result.LastInsertId()
+	user.Id = int32(id)
 	user.Password = password
 	user.Nickname = nickname
 

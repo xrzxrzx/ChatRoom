@@ -30,8 +30,9 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  string session_token = 1;
-  string nickname = 2;
+  bool success = 1;
+  string session_token = 2;
+  string nickname = 3;
 }
 
 message LogoutRequest {
