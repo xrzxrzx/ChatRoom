@@ -7,7 +7,7 @@ import (
 )
 
 type CustomClaims struct {
-	id int32
+	UserId int32
 	jwt.RegisteredClaims
 }
 
@@ -16,7 +16,7 @@ var jwtSecret = []byte("your-secret-key-change-this")
 
 func GenerateToken(id int32) (string, error) {
 	claims := CustomClaims{
-		id: id,
+		UserId: id,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)), // 过期时间
 			IssuedAt:  jwt.NewNumericDate(time.Now()),                    // 签发时间
@@ -55,13 +55,22 @@ func ParseToken(tokenString string) (*CustomClaims, error) {
 	return nil, fmt.Errorf("解析令牌出错")
 }
 
+func IsTokenExpired(tokenString string) bool {
+	claims, err := ParseToken(tokenString)
+	if err != nil {
+		return true
+	}
+
+	return claims.ExpiresAt.Time.Before(time.Now())
+}
+
 func RefreshToken(oldTokenString string) (string, error) {
 	claims, err := ParseToken(oldTokenString)
 	if err != nil {
 		return "", err
 	}
 
-	newToken, err := GenerateToken(claims.id)
+	newToken, err := GenerateToken(claims.UserId)
 	if err != nil {
 		return "", err
 	}

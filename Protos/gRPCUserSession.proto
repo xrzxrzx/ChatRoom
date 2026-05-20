@@ -10,7 +10,7 @@ service UserSessionService {
   rpc Logout (LogoutRequest) returns (LogoutResponse);
   rpc GetSessionInfo (SessionInfoRequest) returns (SessionInfoResponse);
   rpc RefreshSession (RefreshSessionRequest) returns (RefreshSessionResponse);
-  rpc ValidateSession (SessionInfoRequest) returns (SessionInfoResponse);
+  rpc ValidateSession (ValidateSessionRequest) returns (ValidateSessionResponse);
 }
 
 message RegisterRequest {
@@ -59,4 +59,12 @@ message RefreshSessionRequest {
 
 message RefreshSessionResponse {
   string new_session_token = 1;
+}
+
+message ValidateSessionRequest {
+  string session_token = 1;
+}
+
+message ValidateSessionResponse {
+  bool is_valid = 1;
 }
