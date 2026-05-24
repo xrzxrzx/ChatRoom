@@ -1,11 +1,13 @@
-#pragma once
+﻿#pragma once
 
 #include<vector>
 #include<string>
-#include"UserSession.h"
+#include<memory>
 
 using std::vector;
 using std::string;
+
+class UserSession;
 
 class ChatRoom
 {

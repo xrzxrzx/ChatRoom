@@ -3,12 +3,16 @@
 #include<vector>
 #include<string>
 #include<map>
+#include<memory>
 #include<boost/asio.hpp>
 #include"ChatRoom.h"
 
 using std::vector;
 using std::map;
+using std::string;
 using boost::asio::ip::tcp;
+
+class ChatRoom;
 
 class ChatServerService
 {

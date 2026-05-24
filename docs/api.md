@@ -38,6 +38,7 @@
 | 值       | 注解   |
 | ------- | ---- |
 | [send_message](#send_message) | 发送消息 |
+| [register](#register) | 注册 |
 | [login](#login) | 登录 |
 | [request](#request-预留) | 请求   |
 
@@ -66,7 +67,6 @@
 
 | 字段      |   类型   | 注解   |
 | ------- | ------- | ------- |
-| user_id |  `int32` |   用户ID |
 | password | `string` | 密码   |
 | nickname | `string` | 昵称   |
 

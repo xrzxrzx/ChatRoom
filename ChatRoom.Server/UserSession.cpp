@@ -1,9 +1,11 @@
-#include "UserSession.h"
+﻿#include "UserSession.h"
 
 #include<spdlog/spdlog.h>
 #include<nlohmann/json.hpp>
 #include"APIMessageBag.h"
 #include"EventMessageBag.h"
+#include "ChatServerService.h"
+#include "ChatRoom.h"
 
 namespace asio = boost::asio;
 using APIMessageBag::ResquestBag;
@@ -25,9 +27,14 @@ void UserSession::Init()
 					spdlog::info("用户请求登录");
 					// TODO : 处理登录逻辑，获取用户信息后加入聊天室
 				}
+				else if (requestBag.GetAction() == "register")
+				{
+					spdlog::info("用户请求注册");
+					// TODO : 处理注册逻辑，获取用户信息后加入聊天室
+				}
 				else
 				{
-					// TODO : 处理其他接口调用，用户仅能调用一次 login 接口，否则会被服务器断开连接
+					// TODO : 处理其他接口调用，用户仅能调用一次 login 或 register 接口，否则会被服务器断开连接
 				}
 			}
 			else

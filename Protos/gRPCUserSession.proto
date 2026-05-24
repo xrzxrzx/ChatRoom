@@ -14,14 +14,15 @@ service UserSessionService {
 }
 
 message RegisterRequest {
-    string nickname = 1;
+  string nickname = 1;
   string password = 2;
 }
 
 //客户端需根据token或许注册后的详细信息（user_id)
 message RegisterResponse {
   bool success = 1;
-  string session_token = 2;
+  int32 user_id = 2;
+  string session_token = 3;
 }
 
 message LoginRequest {

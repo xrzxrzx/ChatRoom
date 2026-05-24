@@ -37,6 +37,15 @@
     <Filter Include="源文件\core\server_service\message_bag">
       <UniqueIdentifier>{cfe7f6ca-d732-4e15-8f52-0f75f30a49d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\core\gRPC">
+      <UniqueIdentifier>{3a265838-1bd2-4dd5-99fe-45c449b76485}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\core\gRPC">
+      <UniqueIdentifier>{21e78b9e-20ec-4ecf-926f-ac58b6346e6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Protos">
+      <UniqueIdentifier>{e21cd26e-5e57-4f0e-80dd-4c595bcb0d90}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -56,6 +65,15 @@
     </ClCompile>
     <ClCompile Include="APIMessageBag.cpp">
       <Filter>源文件\core\server_service\message_bag</Filter>
+    </ClCompile>
+    <ClCompile Include="UserSessionServiceClient.cpp">
+      <Filter>源文件\core\gRPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Protos\gRPCOut\gRPCUserSession.pb.cc">
+      <Filter>Protos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Protos\gRPCOut\gRPCUserSession.grpc.pb.cc">
+      <Filter>Protos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +97,15 @@
     </ClInclude>
     <ClInclude Include="APIMessageBag.h">
       <Filter>头文件\core\server_service\message_bag</Filter>
+    </ClInclude>
+    <ClInclude Include="UserSessionServiceClient.h">
+      <Filter>头文件\core\gRPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Protos\gRPCOut\gRPCUserSession.pb.h">
+      <Filter>Protos</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Protos\gRPCOut\gRPCUserSession.grpc.pb.h">
+      <Filter>Protos</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -15,11 +15,13 @@ type Server struct {
 func (server *Server) Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error) {
 	var response RegisterResponse
 	var user Database.User
+	var err error
 
 	response.Success = false
+	response.UserId = 0
 	response.SessionToken = ""
 
-	err := user.CreateUser(req.Password, req.Nickname)
+	err = user.CreateUser(req.Password, req.Nickname)
 	if err != nil {
 		return &response, fmt.Errorf("创建用户失败")
 	}
@@ -30,6 +32,7 @@ func (server *Server) Register(ctx context.Context, req *RegisterRequest) (*Regi
 	}
 
 	response.Success = true
+	response.UserId = user.Id
 	response.SessionToken = tokenString
 	return &response, nil
 }

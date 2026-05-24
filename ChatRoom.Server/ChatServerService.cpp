@@ -1,4 +1,4 @@
-#include "ChatServerService.h"
+﻿#include "ChatServerService.h"
 
 #include<spdlog/spdlog.h>
 #include"UserSession.h"
@@ -9,8 +9,8 @@ ChatServerService::ChatServerService(short port) : acceptor(ioContext, tcp::endp
 void ChatServerService::StartAccept()
 {
 	spdlog::info("开始接受连接...");
-	ioContext.run();
 	do_accept();
+	ioContext.run();
 }
 
 void ChatServerService::AddChatRoom(const string& name)

@@ -1,4 +1,4 @@
-#include "ChatRoom.h"
+﻿#include "ChatRoom.h"
 
 void ChatRoom::AddParticipant(std::shared_ptr<UserSession> participant)
 {
