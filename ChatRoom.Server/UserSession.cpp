@@ -25,12 +25,12 @@ void UserSession::Init()
 				if (requestBag.GetAction() == "login")
 				{
 					spdlog::info("用户请求登录");
-					// TODO : 处理登录逻辑，获取用户信息后加入聊天室
+					HandleLogin(requestBag.GetData()["user_id"], requestBag.GetData()["password"]);
 				}
 				else if (requestBag.GetAction() == "register")
 				{
 					spdlog::info("用户请求注册");
-					// TODO : 处理注册逻辑，获取用户信息后加入聊天室
+					HandleRegister(requestBag.GetData()["password"], requestBag.GetData()["nickname"]);
 				}
 				else
 				{
@@ -90,4 +90,14 @@ void UserSession::do_read()
 				spdlog::error("接收消息出错: {}", ec.message());
 			}
 		});
+}
+
+void UserSession::HandleLogin(int userId, const string& password)
+{
+
+}
+
+void UserSession::HandleRegister(const string & password, const string & nickname)
+{
+
 }

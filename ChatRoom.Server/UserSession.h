@@ -34,5 +34,8 @@ private:
 
 	void do_write();
 	void do_read();
+
+	void HandleLogin(int userId, const string& password);
+	void HandleRegister(const string& password, const string& nickname);
 };
 

@@ -31,7 +31,7 @@ using gRPCUserSession::SessionInfoResponse;
 class UserSessionServiceClient
 {
 public:
-	UserSessionServiceClient(std::shared_ptr<Channel> channel) : stub_(UserSessionService::NewStub(channel)) {}
+	UserSessionServiceClient();
 
 	RegisterResponse Register(const string& nickname, const string& password);
 	LoginResponse Login(int userId, const string& password);
