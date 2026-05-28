@@ -114,9 +114,18 @@ namespace ChatRoom.Client.Function.ChatRoom
             return userInfo.NickName;
         }
 
-        public Task<List<RoomInfo>> GetRoomListAsync()
+        public async Task<List<RoomInfo>> GetRoomListAsync()
         {
-            throw new NotImplementedException();
+            var response = await chatClientService.CallAPIAsync("get_room_list");
+
+            if (!response.Success)
+            {
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"获取房间列表失败: {response.ErrorMessage}"));
+                return new List<RoomInfo>();
+            }
+
+            var roomList = response.Data["room_info_list"]?.ToObject<List<RoomInfo>>() ?? new List<RoomInfo>();
+            return roomList;
         }
     }
 

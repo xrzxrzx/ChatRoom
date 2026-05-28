@@ -10,8 +10,10 @@ using System.Threading.Tasks;
 
 namespace ChatRoom.Client.ViewModels
 {
-    public partial class LoginWindowViewModel : ObservableObject
+    public partial class LoginWindowViewModel : ObservableRecipient
     {
+        //TODO 给登录注册界面添加输入验证
+
         [ObservableProperty]
         public partial int UserId { get; set; } = 0;
         [ObservableProperty]
@@ -31,6 +33,7 @@ namespace ChatRoom.Client.ViewModels
         [RelayCommand]
         private async Task LoginAsync()
         {
+            //TODO 登录逻辑
             //var result = await chatRoomService.LogInAsync(UserId, Password);
             var result = true;
             if (result)
@@ -42,6 +45,7 @@ namespace ChatRoom.Client.ViewModels
         [RelayCommand]
         private async Task RegisterAsync()
         {
+            //TODO 注册逻辑
             //var result = await chatRoomService.RegisterAsync(UserId, Password);
             var result = true;
             if(result)

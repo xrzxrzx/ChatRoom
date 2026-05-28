@@ -78,9 +78,11 @@ namespace ChatRoom.Client.ViewModels
             loginWindow.Activate();
         }
 
-        [RelayCommand]
+        private bool CanConnect { get; set; } = true;
+        [RelayCommand(CanExecute = nameof(CanConnect))]
         private async Task ConnectAsync()
         {
+            CanConnect = false;
             //chatRoomService.ConnectToServer();
 
             MessageInfoList.Add(new MessageInfo("Connected to the server."));
@@ -98,14 +100,29 @@ namespace ChatRoom.Client.ViewModels
             }
         }
 
+        private bool CanRefreshRoomList { get; set; } = true;
+        [RelayCommand(CanExecute = nameof(CanRefreshRoomList))]
+        private async Task RefreshRoomListAsync()
+        {
+            CanRefreshRoomList = false;
+            RoomInfoList.Clear();
+            var rooms = await chatRoomService.GetRoomListAsync();
+
+            foreach (var room in rooms)
+            {
+                RoomInfoList.Add(room);
+            }
+            CanRefreshRoomList = true;
+        }
+
         private void OnMessageReceived(OutputMessageInfo message)
         {
             string senderName = message.SenderType switch
             {
-                OutputMessageInfo.MessageSenderType.System => "System",
-                OutputMessageInfo.MessageSenderType.OtherUser => "Other User",
-                OutputMessageInfo.MessageSenderType.Self => "You",
-                _ => "Unknown"
+                OutputMessageInfo.MessageSenderType.System => "系统",
+                OutputMessageInfo.MessageSenderType.OtherUser => "其他用户",
+                OutputMessageInfo.MessageSenderType.Self => "我",
+                _ => "未知"
             };
 
             MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, senderName, message.Content));
