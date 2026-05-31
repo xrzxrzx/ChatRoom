@@ -11,8 +11,16 @@ namespace asio = boost::asio;
 using APIMessageBag::ResquestBag;
 using APIMessageBag::ResponseBag;
 
-void UserSession::Init()
+UserSession::UserSession(ChatServerService& server, std::shared_ptr<IUserSessionServiceClient> userSessionServiceClient)
+	: socket(server.ioContext), server(server), userSessionServiceClient(userSessionServiceClient)
 {
+
+}
+
+void UserSession::Init(boost::asio::ip::tcp::socket socket)
+{
+	this->socket = std::move(socket);
+
 	asio::async_read_until(socket, readBuffer, '\n',
 		[this](boost::system::error_code ec, std::size_t bytes_transferred)
 		{

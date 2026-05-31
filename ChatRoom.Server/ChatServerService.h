@@ -4,6 +4,7 @@
 #include<string>
 #include<map>
 #include<memory>
+#include<functional>
 #include<boost/asio.hpp>
 #include"ChatRoom.h"
 
@@ -14,18 +15,21 @@ using boost::asio::ip::tcp;
 
 class ChatRoom;
 
-class ChatServerService
+// 使用IoC
+class ChatServerService : public std::enable_shared_from_this<ChatServerService>
 {
 public:
 	ChatServerService(short port);
 
 	void StartAccept();
 	void AddChatRoom(const string& name);
+	void SetSessionFactory(std::function<std::shared_ptr<UserSession>()> factory);
 
 private:
 	tcp::acceptor acceptor;
 	tcp::socket socket;
 	boost::asio::io_context ioContext;
+	std::function<std::shared_ptr<UserSession>()> sessionFactory;
 
 	map<int, ChatRoom> chatRoomMap;
 

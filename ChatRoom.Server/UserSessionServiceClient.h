@@ -28,7 +28,18 @@ using gRPCUserSession::RefreshSessionResponse;
 using gRPCUserSession::SessionInfoRequest;
 using gRPCUserSession::SessionInfoResponse;
 
-class UserSessionServiceClient
+class IUserSessionServiceClient 
+{
+public:
+	virtual RegisterResponse Register(const string& nickname, const string& password) = 0;
+	virtual LoginResponse Login(int userId, const string& password) = 0;
+	virtual LogoutResponse Logout(const string& sessionToken) = 0;
+	virtual ValidateSessionResponse ValidateSession(int userId, const string& sessionToken) = 0;
+	virtual RefreshSessionResponse RefreshSession(int userId, const string& sessionToken) = 0;
+	virtual SessionInfoResponse GetSessionInfo(const string& sessionToken) = 0;
+};
+
+class UserSessionServiceClient : public IUserSessionServiceClient
 {
 public:
 	UserSessionServiceClient();

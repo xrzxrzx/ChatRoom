@@ -20,6 +20,11 @@ void ChatServerService::AddChatRoom(const string& name)
 	++id;
 }
 
+void ChatServerService::SetSessionFactory(std::function<std::shared_ptr<UserSession>()> factory)
+{
+	sessionFactory = std::move(factory);
+}
+
 void ChatServerService::do_accept()
 {
 	acceptor.async_accept(socket,
@@ -27,8 +32,14 @@ void ChatServerService::do_accept()
 		{
 			if (!ec)
 			{
-				auto newSession = std::make_shared<UserSession>(std::move(socket), *this);
-				newSession->Init();
+				if (!sessionFactory)
+				{
+					spdlog::error("UserSession factory 未初始化");
+					return;
+				}
+
+				auto newSession = sessionFactory();
+				newSession->Init(std::move(socket));
 			}
 			else
 			{
