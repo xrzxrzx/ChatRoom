@@ -4,17 +4,19 @@
 #include<nlohmann/json.hpp>
 #include"APIMessageBag.h"
 #include"EventMessageBag.h"
-#include "ChatServerService.h"
-#include "ChatRoom.h"
+#include"ChatServerService.h"
+#include"ChatRoom.h"
+#include"UserSessionServiceClient.h"
 
 namespace asio = boost::asio;
 using APIMessageBag::ResquestBag;
 using APIMessageBag::ResponseBag;
 
-UserSession::UserSession(ChatServerService& server, std::shared_ptr<IUserSessionServiceClient> userSessionServiceClient)
-	: socket(server.ioContext), server(server), userSessionServiceClient(userSessionServiceClient)
+UserSession::UserSession(ChatServerService& server, IUserSessionServiceClient& userSessionServiceClient)
+	: socket(server.ioContext), server(server), serviceClient(userSessionServiceClient)
 {
-
+	userId = 0;
+	nickname = "";
 }
 
 void UserSession::Init(boost::asio::ip::tcp::socket socket)
@@ -33,12 +35,12 @@ void UserSession::Init(boost::asio::ip::tcp::socket socket)
 				if (requestBag.GetAction() == "login")
 				{
 					spdlog::info("用户请求登录");
-					HandleLogin(requestBag.GetData()["user_id"], requestBag.GetData()["password"]);
+					HandleLogin(requestBag.GetData()["user_id"], requestBag.GetData()["password"], requestBag.GetEcho());
 				}
 				else if (requestBag.GetAction() == "register")
 				{
 					spdlog::info("用户请求注册");
-					HandleRegister(requestBag.GetData()["password"], requestBag.GetData()["nickname"]);
+					HandleRegister(requestBag.GetData()["password"], requestBag.GetData()["nickname"], requestBag.GetEcho());
 				}
 				else
 				{
@@ -100,12 +102,53 @@ void UserSession::do_read()
 		});
 }
 
-void UserSession::HandleLogin(int userId, const string& password)
+void UserSession::HandleLogin(int userId, const string& password, const string& echo)
 {
+	ResponseBag responseBag(echo);
 
+	auto rpcResponse = serviceClient.Login(userId, password);
+
+	if (rpcResponse.success() == false)
+	{
+		spdlog::error("用户登录失败，userId: {}", userId);
+		responseBag.SetError(1, "登录失败");
+		Deliver(responseBag.ToJsonString());
+
+		boost::system::error_code ec;
+		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		socket.close(ec);
+		return;
+	}
+
+	this->nickname = rpcResponse.nickname();
+
+	responseBag.AddData("session_token", rpcResponse.session_token());
+	responseBag.AddData("nickname", this->nickname);
+	Deliver(responseBag.ToJsonString());
 }
 
-void UserSession::HandleRegister(const string & password, const string & nickname)
+void UserSession::HandleRegister(const string& password, const string& nickname, const string& echo)
 {
+	ResponseBag responseBag(echo);
 
+	auto rpcResponse = serviceClient.Register(nickname, password);
+
+	if (rpcResponse.success() == false)
+	{
+		spdlog::error("用户注册失败，nickname: {}", nickname);
+		responseBag.SetError(1, "注册失败");
+		Deliver(responseBag.ToJsonString());
+		boost::system::error_code ec;
+		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		socket.close(ec);
+		return;
+	}
+
+	this->userId = rpcResponse.user_id();
+	this->nickname = nickname;
+
+	responseBag.AddData("user_id", rpcResponse.user_id());
+	responseBag.AddData("session_token", rpcResponse.session_token());
+	responseBag.AddData("nickname", this->nickname);
+	Deliver(responseBag.ToJsonString());
 }

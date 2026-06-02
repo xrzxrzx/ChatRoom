@@ -26,8 +26,18 @@ namespace APIMessageBag
 	class ResponseBag
 	{
 	public:
-		ResponseBag();
+		ResponseBag(const string& echo);
+
+		void SetError(int recode, const string& message) { this->recode = recode; this->message = message; }
+		void AddData(const string& key, const json& value) { data[key] = value; }
+		string ToJsonString() const;
 
 	private:
+		ResponseBag() = default;
+
+		int recode;
+		string message;
+		string echo;
+		json data;
 	};
 }

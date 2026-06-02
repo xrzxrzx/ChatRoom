@@ -99,6 +99,7 @@
 | 字段      |   类型   | 注解   |
 | ------- | ------- | ------- |
 | user_id |  `int32` |   用户ID |
+| session_token |  `string` |  会话Token(JWT)  |
 | nickname |  `string` |   用户昵称 |
 
 ***
@@ -116,7 +117,7 @@
 
 | 字段      |   类型   | 注解   |
 | ------- | ------- | ------- |
-| user_id |  `int32` |   用户ID |
+| session_token |  `string` |  会话Token(JWT)  |
 | nickname |  `string` |   用户昵称 |
 
 ***

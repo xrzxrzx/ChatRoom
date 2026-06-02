@@ -17,12 +17,16 @@ int main()
 	auto injector = di::make_injector(
 		di::bind<short>.to(port),
 		di::bind<ChatServerService>.in(di::singleton),
-		di::bind<IUserSessionServiceClient>.to<UserSessionServiceClient>()
+		di::bind<IUserSessionServiceClient>.to<UserSessionServiceClient>().in(di::singleton)
 	);
 
 	auto chatServerService = injector.create<std::shared_ptr<ChatServerService>>();
 	chatServerService->SetSessionFactory([&injector]() {
 		return injector.create<std::shared_ptr<UserSession>>();
 		});
+
 	chatServerService->StartAccept();
+	chatServerService->AddChatRoom("游戏开黑");
+	chatServerService->AddChatRoom("技术交流");
+	chatServerService->AddChatRoom("日常吹水");
 }
