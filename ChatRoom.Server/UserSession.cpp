@@ -93,7 +93,7 @@ void UserSession::do_read()
 				string line;
 				std::getline(is, line);
 				ResquestBag requestBag(line);
-				// TODO : 处理用户发送的消息
+				HandleAPIRequest(requestBag);
 			}
 			else
 			{
@@ -102,6 +102,7 @@ void UserSession::do_read()
 		});
 }
 
+//仅在用户登录时调用，且用户仅能调用一次 login 接口，否则会被服务器断开连接
 void UserSession::HandleLogin(int userId, const string& password, const string& echo)
 {
 	ResponseBag responseBag(echo);
@@ -127,6 +128,7 @@ void UserSession::HandleLogin(int userId, const string& password, const string& 
 	Deliver(responseBag.ToJsonString());
 }
 
+//仅在用户注册时调用，且用户仅能调用一次 register 接口，否则会被服务器断开连接
 void UserSession::HandleRegister(const string& password, const string& nickname, const string& echo)
 {
 	ResponseBag responseBag(echo);
@@ -152,3 +154,30 @@ void UserSession::HandleRegister(const string& password, const string& nickname,
 	responseBag.AddData("nickname", this->nickname);
 	Deliver(responseBag.ToJsonString());
 }
+
+//不允许用户在调用 login 或 register 接口前调用
+void UserSession::HandleAPIRequest(const ResquestBag& resquestBag)
+{
+	const string& action = resquestBag.GetAction();
+	if (action == "send_message")
+	{
+		HandleSendMessage(resquestBag);
+	}
+	else if (action == "get_room_list")
+	{
+		HandleGetRoomList(resquestBag);
+	}
+	else if(action == "request")
+	{
+		HandleRequest(resquestBag);
+	}
+}
+
+void UserSession::HandleSendMessage(const ResquestBag& resquestBag)
+{}
+
+void UserSession::HandleGetRoomList(const ResquestBag & resquestBag)
+{}
+
+void UserSession::HandleRequest(const ResquestBag & resquestBag)
+{}

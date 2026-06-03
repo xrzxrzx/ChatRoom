@@ -16,10 +16,12 @@ namespace APIMessageBag
 		string GetAction() const { return action; }
 		json GetData() const { return data; }
 		string GetEcho() const { return echo; }
+		string GetToken() const { return token; }
 
 	private:
 		string action;
 		json data;
+		string token;
 		string echo;
 	};
 
