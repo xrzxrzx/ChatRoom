@@ -45,7 +45,7 @@
 | 字段      |   类型   | 注解   |
 | ------- | ------- | ------- |
 | sender |  `int32` | 发送人ID |
-| notice_type | `string` | 发送的消息 |
+| notice_type | `string` | 通知类型 |
 
 **关于`notece_type`字段**
 
@@ -53,6 +53,31 @@
 | ------- | ---- |
 | join | 加入聊天室 |
 | leave | 离开聊天室 |
+
+***
+
+## update
+
+**事件数据**
+
+| 字段      |   类型   | 注解   |
+| ------- | ------- | ------- |
+| update_type | `string` | 更新类型 |
+| update_data | `array` | 更新数据 |
+
+**关于`update_type`字段**
+
+| 值       | 注解   |
+| ------- | ---- |
+| [room_list](#room_list) | 聊天室列表 |
+
+**关于`update_data`字段**
+
+##### `room_list`
+| 字段      |   类型   | 注解   |
+| ------- | ------- | ------- |
+| room_id |  `int32` |   房间ID |
+| room_name |  `string` |   房间名称 |
 
 ***
 

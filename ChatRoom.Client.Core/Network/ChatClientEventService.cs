@@ -22,6 +22,7 @@ namespace ChatRoom.Client.Core.Network
             {
                 "message" => messageBag as MessageEvent,
                 "notice" => messageBag as NoticeEvent,
+                "update" => messageBag as UpdateEvent,
                 "request" => messageBag as RequestEvent,
                 "heartbeat" => messageBag as HeartbeatEvent,
                 _ => throw new InvalidOperationException($"Unknown event type: {messageBag.PostType}")
@@ -99,6 +100,8 @@ namespace ChatRoom.Client.Core.Network
     }
 
     #region 事件类型定义
+
+    //消息事件
     public class MessageEvent : EventMessageBag
     {
         public MessageEvent(JObject recvJson) : base(recvJson)
@@ -106,6 +109,7 @@ namespace ChatRoom.Client.Core.Network
         }
     }
 
+    //通知事件（如系统通知）
     public class NoticeEvent : EventMessageBag
     {
         public NoticeEvent(JObject recvJson) : base(recvJson)
@@ -113,6 +117,15 @@ namespace ChatRoom.Client.Core.Network
         }
     }
 
+    //更新事件（如房间列表更新）
+    public class UpdateEvent : EventMessageBag
+    {
+        public UpdateEvent(JObject recvJson) : base(recvJson)
+        {
+        }
+    }
+
+    //请求事件（预留）
     public class RequestEvent : EventMessageBag
     {
         public RequestEvent(JObject recvJson) : base(recvJson)
@@ -120,6 +133,7 @@ namespace ChatRoom.Client.Core.Network
         }
     }
 
+    //心跳事件
     public class HeartbeatEvent : EventMessageBag
     {
         public HeartbeatEvent(JObject recvJson) : base(recvJson)
