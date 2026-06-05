@@ -40,6 +40,7 @@
 | ------- | ---- |
 | [send_message](#send_message) | 发送消息 |
 | [get_room_list](#get_room_list) | 获取房间信息列表 |
+| [join_room](#join_room) | 获取房间信息列表 |
 | [register](#register) | 注册 |
 | [login](#login) | 登录 |
 | [request](#request-预留) | 请求   |

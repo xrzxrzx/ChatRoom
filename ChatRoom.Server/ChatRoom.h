@@ -17,6 +17,8 @@ public:
 	void AddParticipant(std::shared_ptr<UserSession> participant);
 	void RemoveParticipant(std::shared_ptr<UserSession> participant);
 
+	void Broadcast(const string& message);
+
 	string GetName() const { return name; }
 	int GetId() const { return id; }
 

@@ -11,12 +11,13 @@
 using std::queue;
 using std::string;
 using boost::asio::ip::tcp;
+using json = nlohmann::json;
 
 class ChatRoom;
 class ChatServerService;
 class IUserSessionServiceClient;
 
-using APIMessageBag::ResquestBag;
+using APIMessageBag::RequestBag;
 using APIMessageBag::ResponseBag;
 
 // 使用IoC
@@ -36,7 +37,7 @@ private:
 
 	ChatRoom* currentChatRoom = nullptr;
 	ChatServerService& server;
-	IUserSessionServiceClient& serviceClient;
+	IUserSessionServiceClient& gRPCServiceClient;
 	friend class ChatServerService;
 
 	//用户信息
@@ -49,9 +50,12 @@ private:
 	void HandleLogin(int userId, const string& password, const string& echo);
 	void HandleRegister(const string& password, const string& nickname, const string& echo);
 
-	void HandleAPIRequest(const ResquestBag& resquestBag);
-	void HandleSendMessage(const ResquestBag& resquestBag);
-	void HandleGetRoomList(const ResquestBag& resquestBag);
-	void HandleRequest(const ResquestBag& resquestBag);
+	void HandleAPIRequest(const RequestBag& requestBag);
+	void HandleSendMessage(const RequestBag& requestBag);
+	void HandleGetRoomList(const RequestBag& requestBag);
+	void HandleJoinRoom(const RequestBag& requestBag);
+	void HandleRequest(const RequestBag& requestBag);
+
+	bool ValidateToken(const string& token, ResponseBag& responseBag);
 };
 

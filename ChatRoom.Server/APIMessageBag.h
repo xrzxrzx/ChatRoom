@@ -8,10 +8,10 @@ namespace APIMessageBag
 	using std::string;
 	using json = nlohmann::json;
 
-	class ResquestBag
+	class RequestBag
 	{
 	public:
-		ResquestBag(string rawMessage);
+		RequestBag(string rawMessage);
 
 		string GetAction() const { return action; }
 		json GetData() const { return data; }

@@ -3,7 +3,7 @@
 
 using std::string;
 
-APIMessageBag::ResquestBag::ResquestBag(string rawMessage)
+APIMessageBag::RequestBag::RequestBag(string rawMessage)
 {
 	json jsonMessage = json::parse(rawMessage);
 	action = jsonMessage["action"].get<string>();

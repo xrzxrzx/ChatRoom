@@ -9,11 +9,11 @@
 #include"UserSessionServiceClient.h"
 
 namespace asio = boost::asio;
-using APIMessageBag::ResquestBag;
+using APIMessageBag::RequestBag;
 using APIMessageBag::ResponseBag;
 
 UserSession::UserSession(ChatServerService& server, IUserSessionServiceClient& userSessionServiceClient)
-	: socket(server.ioContext), server(server), serviceClient(userSessionServiceClient)
+	: socket(server.ioContext), server(server), gRPCServiceClient(userSessionServiceClient)
 {
 	userId = 0;
 	nickname = "";
@@ -31,7 +31,7 @@ void UserSession::Init(boost::asio::ip::tcp::socket socket)
 				std::istream is(&readBuffer);
 				string line;
 				std::getline(is, line);
-				ResquestBag requestBag(line);
+				RequestBag requestBag(line);
 				if (requestBag.GetAction() == "login")
 				{
 					spdlog::info("用户请求登录");
@@ -92,7 +92,7 @@ void UserSession::do_read()
 				std::istream is(&readBuffer);
 				string line;
 				std::getline(is, line);
-				ResquestBag requestBag(line);
+				RequestBag requestBag(line);
 				HandleAPIRequest(requestBag);
 			}
 			else
@@ -107,7 +107,7 @@ void UserSession::HandleLogin(int userId, const string& password, const string& 
 {
 	ResponseBag responseBag(echo);
 
-	auto rpcResponse = serviceClient.Login(userId, password);
+	auto rpcResponse = gRPCServiceClient.Login(userId, password);
 
 	if (rpcResponse.success() == false)
 	{
@@ -133,7 +133,7 @@ void UserSession::HandleRegister(const string& password, const string& nickname,
 {
 	ResponseBag responseBag(echo);
 
-	auto rpcResponse = serviceClient.Register(nickname, password);
+	auto rpcResponse = gRPCServiceClient.Register(nickname, password);
 
 	if (rpcResponse.success() == false)
 	{
@@ -156,28 +156,94 @@ void UserSession::HandleRegister(const string& password, const string& nickname,
 }
 
 //不允许用户在调用 login 或 register 接口前调用
-void UserSession::HandleAPIRequest(const ResquestBag& resquestBag)
+void UserSession::HandleAPIRequest(const RequestBag& requestBag)
 {
-	const string& action = resquestBag.GetAction();
+	ResponseBag responseBag(requestBag.GetEcho());
+
+	if (ValidateToken(requestBag.GetToken(), responseBag))
+		return;
+
+	auto action = requestBag.GetAction();
 	if (action == "send_message")
 	{
-		HandleSendMessage(resquestBag);
+		HandleSendMessage(requestBag);
 	}
 	else if (action == "get_room_list")
 	{
-		HandleGetRoomList(resquestBag);
+		HandleGetRoomList(requestBag);
+	}
+	else if (action == "join_room")
+	{
+		HandleJoinRoom(requestBag);
 	}
 	else if(action == "request")
 	{
-		HandleRequest(resquestBag);
+		HandleRequest(requestBag);
 	}
 }
 
-void UserSession::HandleSendMessage(const ResquestBag& resquestBag)
-{}
+void UserSession::HandleSendMessage(const RequestBag& requestBag)
+{
+	ResponseBag responseBag(requestBag.GetEcho());
 
-void UserSession::HandleGetRoomList(const ResquestBag & resquestBag)
-{}
+	if (ValidateToken(requestBag.GetToken(), responseBag))
+		return;
 
-void UserSession::HandleRequest(const ResquestBag & resquestBag)
-{}
+	if (currentChatRoom == nullptr)
+	{
+		responseBag.SetError(403, "用户未加入聊天室");
+		Deliver(responseBag.ToJsonString());
+		return;
+	}
+
+	auto& message = requestBag.GetData()["message"];
+	auto& sender = requestBag.GetData()["sender"];
+	responseBag.AddData("message", message);
+	responseBag.AddData("sender", sender);
+
+	currentChatRoom->Broadcast(responseBag.ToJsonString());
+}
+
+void UserSession::HandleGetRoomList(const RequestBag & requestBag)
+{
+	ResponseBag responseBag(requestBag.GetEcho());
+
+	if (ValidateToken(requestBag.GetToken(), responseBag))
+		return;
+
+	json roomList = json::array();
+	for (auto& [roomId, room] : server.chatRoomMap)
+	{
+		roomList.push_back({ {"room_id", roomId}, {"room_name", room.GetName()} });
+	}
+
+	responseBag.AddData("room_info_list", roomList);
+	Deliver(responseBag.ToJsonString());
+}
+
+void UserSession::HandleJoinRoom(const RequestBag& requestBag)
+{
+	ResponseBag responseBag(requestBag.GetEcho());
+
+	if (ValidateToken(requestBag.GetToken(), responseBag))
+		return;
+
+	//TODO : 处理用户加入聊天室的请求
+}
+
+void UserSession::HandleRequest(const RequestBag & requestBag)
+{
+	// TODO 处理请求API
+}
+
+bool UserSession::ValidateToken(const string& token, ResponseBag& responseBag)
+{
+	auto rpcResponse = gRPCServiceClient.ValidateSession(userId, token);
+	if (!rpcResponse.is_valid())
+	{
+		responseBag.SetError(502, "令牌不合法");
+		Deliver(responseBag.ToJsonString());
+		return false;
+	}
+	return true;
+}
