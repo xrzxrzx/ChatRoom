@@ -44,15 +44,15 @@
 
 | 字段      |   类型   | 注解   |
 | ------- | ------- | ------- |
-| sender |  `int32` | 发送人ID |
+| user_id |  `int32` | 发送人ID |
 | notice_type | `string` | 通知类型 |
 
 **关于`notece_type`字段**
 
 | 值       | 注解   |
 | ------- | ---- |
-| join | 加入聊天室 |
-| leave | 离开聊天室 |
+| join_room | 加入聊天室 |
+| leave_room | 离开聊天室 |
 
 ***
 

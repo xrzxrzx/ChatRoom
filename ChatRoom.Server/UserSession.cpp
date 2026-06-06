@@ -113,7 +113,7 @@ void UserSession::HandleLogin(int userId, const string& password, const string& 
 	{
 		spdlog::error("用户登录失败，userId: {}", userId);
 		responseBag.SetError(1, "登录失败");
-		Deliver(responseBag.ToJsonString());
+		DeliverResponse(responseBag);
 
 		boost::system::error_code ec;
 		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
@@ -125,7 +125,7 @@ void UserSession::HandleLogin(int userId, const string& password, const string& 
 
 	responseBag.AddData("session_token", rpcResponse.session_token());
 	responseBag.AddData("nickname", this->nickname);
-	Deliver(responseBag.ToJsonString());
+	DeliverResponse(responseBag);
 }
 
 //仅在用户注册时调用，且用户仅能调用一次 register 接口，否则会被服务器断开连接
@@ -139,7 +139,7 @@ void UserSession::HandleRegister(const string& password, const string& nickname,
 	{
 		spdlog::error("用户注册失败，nickname: {}", nickname);
 		responseBag.SetError(1, "注册失败");
-		Deliver(responseBag.ToJsonString());
+		DeliverResponse(responseBag);
 		boost::system::error_code ec;
 		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 		socket.close(ec);
@@ -152,7 +152,7 @@ void UserSession::HandleRegister(const string& password, const string& nickname,
 	responseBag.AddData("user_id", rpcResponse.user_id());
 	responseBag.AddData("session_token", rpcResponse.session_token());
 	responseBag.AddData("nickname", this->nickname);
-	Deliver(responseBag.ToJsonString());
+	DeliverResponse(responseBag);
 }
 
 //不允许用户在调用 login 或 register 接口前调用
@@ -197,11 +197,14 @@ void UserSession::HandleSendMessage(const RequestBag& requestBag)
 	}
 
 	auto& message = requestBag.GetData()["message"];
-	auto& sender = requestBag.GetData()["sender"];
 	responseBag.AddData("message", message);
-	responseBag.AddData("sender", sender);
+	DeliverResponse(responseBag);
 
-	currentChatRoom->Broadcast(responseBag.ToJsonString());
+	EventMessageBag eventMessageBag("message");
+	eventMessageBag.AddData("message", message);
+	eventMessageBag.AddData("sender", userId);
+	eventMessageBag.AddData("nickname", nickname);
+	currentChatRoom->Broadcast(eventMessageBag);
 }
 
 void UserSession::HandleGetRoomList(const RequestBag & requestBag)
@@ -218,7 +221,7 @@ void UserSession::HandleGetRoomList(const RequestBag & requestBag)
 	}
 
 	responseBag.AddData("room_info_list", roomList);
-	Deliver(responseBag.ToJsonString());
+	DeliverResponse(responseBag);
 }
 
 void UserSession::HandleJoinRoom(const RequestBag& requestBag)
@@ -228,7 +231,24 @@ void UserSession::HandleJoinRoom(const RequestBag& requestBag)
 	if (ValidateToken(requestBag.GetToken(), responseBag))
 		return;
 
-	//TODO : 处理用户加入聊天室的请求
+	auto& roomId = requestBag.GetData()["room_id"];
+	bool success = server.JoinChatRoom(roomId, shared_from_this());
+	if (!success)
+	{
+		responseBag.SetError(404, "聊天室不存在");
+		responseBag.AddData("success", false);
+		DeliverResponse(responseBag);
+		return;
+	}
+
+	responseBag.AddData("success", true);
+	DeliverResponse(responseBag);
+
+	//广播用户加入聊天室事件
+	EventMessageBag eventMessageBag("notice");
+	eventMessageBag.AddData("notice_type", "join_room");
+	eventMessageBag.AddData("user_id", userId);
+	currentChatRoom->Broadcast(eventMessageBag);
 }
 
 void UserSession::HandleRequest(const RequestBag & requestBag)
@@ -242,7 +262,7 @@ bool UserSession::ValidateToken(const string& token, ResponseBag& responseBag)
 	if (!rpcResponse.is_valid())
 	{
 		responseBag.SetError(502, "令牌不合法");
-		Deliver(responseBag.ToJsonString());
+		DeliverResponse(responseBag);
 		return false;
 	}
 	return true;

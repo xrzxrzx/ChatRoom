@@ -8,6 +8,7 @@ using std::vector;
 using std::string;
 
 class UserSession;
+class EventMessageBag;
 
 class ChatRoom
 {
@@ -17,7 +18,7 @@ public:
 	void AddParticipant(std::shared_ptr<UserSession> participant);
 	void RemoveParticipant(std::shared_ptr<UserSession> participant);
 
-	void Broadcast(const string& message);
+	void Broadcast(const EventMessageBag& eventMessageBag);
 
 	string GetName() const { return name; }
 	int GetId() const { return id; }

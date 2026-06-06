@@ -26,9 +26,9 @@ public:
 	void SetSessionFactory(std::function<std::shared_ptr<UserSession>()> factory);
 
 private:
+	boost::asio::io_context ioContext;
 	tcp::acceptor acceptor;
 	tcp::socket socket;
-	boost::asio::io_context ioContext;
 	std::function<std::shared_ptr<UserSession>()> sessionFactory;
 
 	map<int, ChatRoom> chatRoomMap;

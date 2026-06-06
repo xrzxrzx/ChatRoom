@@ -28,7 +28,8 @@ public:
 
 	//初始化新连接，需要等待客户端调用 login 接口，获取用户信息后才能加入聊天室，且用户仅能调用一次 login 接口，否则会被服务器断开连接
 	void Init(boost::asio::ip::tcp::socket socket);
-	void Deliver(const string& message); 
+	void DeliverResponse(const ResponseBag& responseBag) { Deliver(responseBag.ToJsonString()); }
+	void DeliverEvent(const EventMessageBag& eventMessageBag) { Deliver(eventMessageBag.ToJsonString()); }
 
 private:
 	tcp::socket socket;
@@ -46,6 +47,9 @@ private:
 
 	void do_write();
 	void do_read();
+
+	//不要调用这个函数直接发送消息，应该调用 DeliverResponse 或 DeliverEvent 来发送响应或事件消息
+	void Deliver(const string& message); 
 
 	void HandleLogin(int userId, const string& password, const string& echo);
 	void HandleRegister(const string& password, const string& nickname, const string& echo);
