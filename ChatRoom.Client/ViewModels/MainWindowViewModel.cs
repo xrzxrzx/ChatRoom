@@ -83,11 +83,7 @@ namespace ChatRoom.Client.ViewModels
         private async Task ConnectAsync()
         {
             CanConnect = false;
-            //chatRoomService.ConnectToServer();
-
-            MessageInfoList.Add(new MessageInfo("Connected to the server."));
-            MessageInfoList.Add(new MessageInfo(1, "我", "你好。。。。。。。。。。。。。。阿达电视............测试阿萨是的啊实打实的气温气温", true));
-            MessageInfoList.Add(new MessageInfo(1, "用户啊啊啊", "阿达阿达是的阿达阿达是的千问"));
+            chatRoomService.ConnectToServer();
         }
 
         [RelayCommand]

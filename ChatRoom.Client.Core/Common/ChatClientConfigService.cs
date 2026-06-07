@@ -11,7 +11,7 @@ namespace ChatRoom.Client.Core.Common
 
         public ChatClientConfigService()
         {
-            
+            _configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _configFilePath);
         }
 
         public ChatClientConfig GetConfig()
@@ -37,8 +37,11 @@ namespace ChatRoom.Client.Core.Common
 
     public record ChatClientConfig
     {
-        public string ServerIp { get; init; }
-        public int ServerPort { get; init; }
+        public string ServerIp { get; init; } = string.Empty;
+        public int ServerPort { get; init; } = 0;
+
+        public ChatClientConfig() { }
+
         public ChatClientConfig(string serverIp, int serverPort)
         {
             ServerIp = serverIp;
