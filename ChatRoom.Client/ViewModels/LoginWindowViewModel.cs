@@ -34,8 +34,7 @@ namespace ChatRoom.Client.ViewModels
         private async Task LoginAsync()
         {
             //TODO 登录逻辑
-            //var result = await chatRoomService.LogInAsync(UserId, Password);
-            var result = true;
+            var result = await chatRoomService.LogInAsync(UserId, Password);
             if (result)
             {
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("登录成功"));
@@ -46,8 +45,7 @@ namespace ChatRoom.Client.ViewModels
         private async Task RegisterAsync()
         {
             //TODO 注册逻辑
-            //var result = await chatRoomService.RegisterAsync(UserId, Password);
-            var result = true;
+            var result = await chatRoomService.RegisterAsync(UserId, Password, NickName);
             if(result)
             {
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("注册成功"));

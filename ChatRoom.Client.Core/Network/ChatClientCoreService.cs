@@ -26,7 +26,14 @@ namespace ChatRoom.Client.Core.Network
         {
             if (!tcpClient.Connected)
             {
-                await tcpClient.ConnectAsync(chatClientConfig.ServerIp, chatClientConfig.ServerPort);
+                try
+                {
+                    await tcpClient.ConnectAsync(chatClientConfig.ServerIp, chatClientConfig.ServerPort);
+                }
+                catch
+                {
+                    throw;
+                }
             }
         }
 

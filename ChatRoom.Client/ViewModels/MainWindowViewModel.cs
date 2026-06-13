@@ -113,15 +113,18 @@ namespace ChatRoom.Client.ViewModels
 
         private void OnMessageReceived(OutputMessageInfo message)
         {
-            string senderName = message.SenderType switch
+            switch (message.SenderType)
             {
-                OutputMessageInfo.MessageSenderType.System => "系统",
-                OutputMessageInfo.MessageSenderType.OtherUser => "其他用户",
-                OutputMessageInfo.MessageSenderType.Self => "我",
-                _ => "未知"
-            };
-
-            MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, senderName, message.Content));
+                case OutputMessageInfo.MessageSenderType.System:
+                    MessageInfoList.Add(new(message.Content));
+                    break;
+                case OutputMessageInfo.MessageSenderType.OtherUser:
+                    MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, message.SenderInfo.NickName, message.Content));
+                    break;
+                case OutputMessageInfo.MessageSenderType.Self:
+                    MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, message.SenderInfo.NickName, message.Content, true));
+                    break;
+            }
         }
 
         public async void Receive(ValueChangedMessage<string> message)

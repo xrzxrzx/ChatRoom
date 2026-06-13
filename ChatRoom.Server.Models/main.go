@@ -1,14 +1,19 @@
 package main
 
 import (
+	"ChatRoom.Server.Models/Common"
 	"ChatRoom.Server.Models/Protos/gRPCUserSession"
+	"fmt"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":12345")
+	var serviceConfig Common.ServiceConfig
+	serviceConfig.LoadConfigFile("config.yaml")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", serviceConfig.Port))
 	if err != nil {
 		panic(err)
 	}

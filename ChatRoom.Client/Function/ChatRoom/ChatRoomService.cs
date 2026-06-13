@@ -35,7 +35,14 @@ namespace ChatRoom.Client.Function.ChatRoom
 
         public async void ConnectToServer()
         {
-            await chatClientService.ConnectAsync();
+
+            var result = await chatClientService.ConnectAsync();
+            if (result == false)
+            {
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "连接服务器失败"));
+                return;
+            }
+
             chatClientService.StartReceiving();
         }
 
@@ -44,11 +51,11 @@ namespace ChatRoom.Client.Function.ChatRoom
             throw new NotImplementedException();
         }
 
-        public async Task<bool> RegisterAsync(string user_id, string password, string nickname)
+        public async Task<bool> RegisterAsync(int user_id, string password, string nickname)
         {
-            var response = await chatClientService.CallAPIAsync("register", new APIParameter("user_id", user_id),
-                                                     new APIParameter("password", password),
-                                                     new APIParameter("nickname", nickname));
+            var response = await chatClientService.CallAPIAsync("register", new("user_id", user_id),
+                                                     new("password", password),
+                                                     new("nickname", nickname));
             if (response.Success == false)
             {
                 OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"注册失败: {response.ErrorMessage}"));
@@ -61,8 +68,9 @@ namespace ChatRoom.Client.Function.ChatRoom
 
         public async Task<bool> LogInAsync(int userId, string password)
         {
-            var response = await chatClientService.CallAPIAsync("login", new APIParameter("user_id", userId),
-                                                     new APIParameter("password", password));
+            var response = await chatClientService.CallAPIAsync("login",
+                                               new("user_id", userId),
+                                                        new("password", password));
             if (response.Success == false)
             {
                 OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"登陆失败: {response.ErrorMessage}"));

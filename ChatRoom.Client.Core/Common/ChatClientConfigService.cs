@@ -39,13 +39,9 @@ namespace ChatRoom.Client.Core.Common
     {
         public string ServerIp { get; init; } = string.Empty;
         public int ServerPort { get; init; } = 0;
+        public int ConnectionRetryCount { get; init; } = 0;
+        public int ConnectionTimeout { get; init; } = 0;
 
         public ChatClientConfig() { }
-
-        public ChatClientConfig(string serverIp, int serverPort)
-        {
-            ServerIp = serverIp;
-            ServerPort = serverPort;
-        }
     }
 }
