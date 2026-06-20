@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ChatRoom.Client.Function.ChatRoom
+namespace ChatRoom.Client.Function.ChatRoom;
+
+public record UserInfo
 {
-    internal record UserInfo
-    {
-        public int Id { get; set; }
-        public string NickName { get; set; } = string.Empty;
-    }
+    public int Id { get; set; }
+    public string NickName { get; set; } = string.Empty;
 }

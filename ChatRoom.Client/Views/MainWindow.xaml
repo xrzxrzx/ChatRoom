@@ -60,11 +60,11 @@
                             <TextBlock
                                 FontSize="18"
                                 FontWeight="Bold"
-                                Text="{Binding NickName}" />
+                                Text="{Binding UserInfo.NickName}" />
                             <TextBlock
                                 FontSize="14"
                                 Foreground="CadetBlue"
-                                Text="{Binding UserId}" />
+                                Text="{Binding UserInfo.Id}" />
                         </StackPanel>
                     </Grid>
 
@@ -118,7 +118,32 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
 
-                    <ListView Grid.Row="0" />
+                    <!--  房间列表  -->
+                    <ListView
+                        x:Name="ChatRoomListView"
+                        Grid.Row="0"
+                        ItemsSource="{Binding RoomInfoList}"
+                        SelectedItem="{Binding SelectedRoom, Mode=OneWay}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:RoomInfoModel">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        HorizontalAlignment="Left"
+                                        Text="{x:Bind Name}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        Text="{x:Bind UserCount}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
 
                     <Button
                         Grid.Row="1"
@@ -151,7 +176,7 @@
                     ScrollViewer.VerticalScrollBarVisibility="Auto"
                     SelectedItem="{Binding SelectedMessage, Mode=TwoWay}">
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="models:MessageInfo">
+                        <DataTemplate x:DataType="models:MessageInfoModel">
                             <Grid
                                 Margin="0,0,0,12"
                                 Padding="4"

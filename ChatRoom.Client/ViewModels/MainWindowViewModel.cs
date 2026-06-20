@@ -13,145 +13,140 @@ using System.Collections.ObjectModel;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatRoom.Client.ViewModels
+namespace ChatRoom.Client.ViewModels;
+
+public partial class MainWindowViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>
 {
-    public partial class MainWindowViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>
+    [ObservableProperty]
+    public partial ObservableCollection<MessageInfoModel> MessageInfoList { get; set; } = new ObservableCollection<MessageInfoModel>();
+
+    [ObservableProperty]
+    public partial ObservableCollection<RoomInfoModel> RoomInfoList { get; set; } = new ObservableCollection<RoomInfoModel>();
+
+    [ObservableProperty]
+    public partial MessageInfoModel SelectedMessage { get; set; } = new MessageInfoModel(0, string.Empty, string.Empty);
+    
+    [ObservableProperty]
+    public partial RoomInfoModel SelectedRoom { get; set; } = new RoomInfoModel(0, string.Empty, 0);
+
+    [ObservableProperty]
+    public partial string InputMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial UserInfoModel UserInfo { get; set; } = new UserInfoModel(0, "未登录");
+
+    private readonly IChatRoomService chatRoomService;
+
+    public MainWindowViewModel(IChatRoomService chatRoomService)
     {
-        [ObservableProperty]
-        public partial ObservableCollection<MessageInfo> MessageInfoList { get; set; } = new ObservableCollection<MessageInfo>();
+        this.chatRoomService = chatRoomService;
+        this.chatRoomService.OutputMessage += OnMessageReceived;
 
-        public ObservableCollection<RoomInfo> RoomInfoList { get; set; } = new ObservableCollection<RoomInfo>();
+        IsActive = true;
+    }
 
-        [ObservableProperty]
-        public partial MessageInfo SelectedMessage { get; set; } = new MessageInfo(0, string.Empty, string.Empty);
+    [RelayCommand]
+    private async Task LoginAsync(string logType)
+    {
+        var loginWindow = App.Current.ServiceProvider.GetRequiredService<LoginWindow>();
+        loginWindow.SetLogType(logType);
 
-        [ObservableProperty]
-        public partial string InputMessage { get; set; } = string.Empty;
-
-        [ObservableProperty]
-        public partial int UserId { get; set; } = 0;
-
-        [ObservableProperty]
-        public partial string NickName { get; set; } = "未登录";
-
-        private readonly IChatRoomService chatRoomService;
-
-        public MainWindowViewModel(IChatRoomService chatRoomService)
+        // 监听 LoginWindow 的 Closed 事件来恢复 MainWindow 可用性
+        loginWindow.Closed += (s, e) =>
         {
-            this.chatRoomService = chatRoomService;
-            this.chatRoomService.OutputMessage += OnMessageReceived;
-
-            IsActive = true;
-        }
-
-        [RelayCommand]
-        private async Task LoginAsync(string logType)
-        {
-            var loginWindow = App.Current.ServiceProvider.GetRequiredService<LoginWindow>();
-            loginWindow.SetLogType(logType);
-
-            // 监听 LoginWindow 的 Closed 事件来恢复 MainWindow 可用性
-            loginWindow.Closed += (s, e) =>
+            if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Control control)
             {
-                if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Control control)
-                {
-                    control.IsEnabled = true;
-                }
-                else if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Panel panel)
-                {
-                    panel.IsHitTestVisible = true;
-                    panel.Opacity = 1.0;
-                }
-            };
-
-            // 禁用 MainWindow 的内容
-            if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Control contentControl)
-            {
-                contentControl.IsEnabled = false;
+                control.IsEnabled = true;
             }
-            else if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Panel contentPanel)
+            else if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Panel panel)
             {
-                contentPanel.IsHitTestVisible = false;
-                contentPanel.Opacity = 0.5; // 半透明化以提示不可用
+                panel.IsHitTestVisible = true;
+                panel.Opacity = 1.0;
             }
+        };
 
-            loginWindow.Activate();
+        // 禁用 MainWindow 的内容
+        if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Control contentControl)
+        {
+            contentControl.IsEnabled = false;
+        }
+        else if (App.Current.MainWindow?.Content is Microsoft.UI.Xaml.Controls.Panel contentPanel)
+        {
+            contentPanel.IsHitTestVisible = false;
+            contentPanel.Opacity = 0.5; // 半透明化以提示不可用
         }
 
-        private bool CanConnect { get; set; } = true;
-        [RelayCommand(CanExecute = nameof(CanConnect))]
-        private async Task ConnectAsync()
-        {
-            CanConnect = false;
-            chatRoomService.ConnectToServer();
-        }
+        loginWindow.Activate();
+    }
 
-        [RelayCommand]
-        private async Task SendMessageAsync()
+    private bool CanConnect { get; set; } = true;
+    [RelayCommand(CanExecute = nameof(CanConnect))]
+    private async Task ConnectAsync()
+    {
+        CanConnect = false;
+        chatRoomService.ConnectToServer();
+    }
+
+    [RelayCommand]
+    private async Task SendMessageAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(InputMessage))
         {
-            if (!string.IsNullOrWhiteSpace(InputMessage))
+            await chatRoomService.SendMessageAsync(InputMessage);
+            InputMessage = string.Empty;
+        }
+    }
+
+    private bool CanRefreshRoomList { get; set; } = true;
+    [RelayCommand(CanExecute = nameof(CanRefreshRoomList))]
+    private async Task RefreshRoomListAsync()
+    {
+        CanRefreshRoomList = false;
+        RoomInfoList.Clear();
+        var rooms = await chatRoomService.GetRoomListAsync();
+
+        foreach (var room in rooms)
+        {
+            RoomInfoList.Add(RoomInfoModel.FromRoomInfo(room));
+        }
+        CanRefreshRoomList = true;
+    }
+
+    private void OnMessageReceived(OutputMessageInfo message)
+    {
+        MessageInfoList.Add(MessageInfoModel.FromOutputMessageInfo(message));
+    }
+
+    public async void Receive(ValueChangedMessage<string> message)
+    {
+        if (message.Value == "登录成功")
+        {
+            UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
-                await chatRoomService.SendMessageAsync(InputMessage);
-                InputMessage = string.Empty;
-            }
-        }
-
-        private bool CanRefreshRoomList { get; set; } = true;
-        [RelayCommand(CanExecute = nameof(CanRefreshRoomList))]
-        private async Task RefreshRoomListAsync()
-        {
-            CanRefreshRoomList = false;
+                Id = chatRoomService.GetUserId(),
+                NickName = chatRoomService.GetNickName()
+            });
+            MessageInfoList.Add(new (0, string.Empty, message.Value));
             RoomInfoList.Clear();
             var rooms = await chatRoomService.GetRoomListAsync();
-
             foreach (var room in rooms)
             {
-                RoomInfoList.Add(room);
-            }
-            CanRefreshRoomList = true;
-        }
-
-        private void OnMessageReceived(OutputMessageInfo message)
-        {
-            switch (message.SenderType)
-            {
-                case OutputMessageInfo.MessageSenderType.System:
-                    MessageInfoList.Add(new(message.Content));
-                    break;
-                case OutputMessageInfo.MessageSenderType.OtherUser:
-                    MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, message.SenderInfo.NickName, message.Content));
-                    break;
-                case OutputMessageInfo.MessageSenderType.Self:
-                    MessageInfoList.Add(new MessageInfo(message.SenderInfo.Id, message.SenderInfo.NickName, message.Content, true));
-                    break;
+                RoomInfoList.Add(RoomInfoModel.FromRoomInfo(room));
             }
         }
-
-        public async void Receive(ValueChangedMessage<string> message)
+        else if (message.Value == "注册成功")
         {
-            if (message.Value == "登录成功")
+            UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
-                UserId = chatRoomService.GetUserId();
-                NickName = chatRoomService.GetNickName();
-                MessageInfoList.Add(new MessageInfo(message.Value));
-                RoomInfoList.Clear();
-                var rooms = await chatRoomService.GetRoomListAsync();
-                foreach (var room in rooms)
-                {
-                    RoomInfoList.Add(room);
-                }
-            }
-            else if (message.Value == "注册成功")
+                Id = chatRoomService.GetUserId(),
+                NickName = chatRoomService.GetNickName()
+            });
+            MessageInfoList.Add(new (0, string.Empty, message.Value));
+            RoomInfoList.Clear();
+            var rooms = await chatRoomService.GetRoomListAsync();
+            foreach (var room in rooms)
             {
-                UserId = chatRoomService.GetUserId();
-                NickName = chatRoomService.GetNickName();
-                MessageInfoList.Add(new MessageInfo(message.Value));
-                RoomInfoList.Clear();
-                var rooms = await chatRoomService.GetRoomListAsync();
-                foreach (var room in rooms)
-                {
-                    RoomInfoList.Add(room);
-                }
+                RoomInfoList.Add(RoomInfoModel.FromRoomInfo(room));
             }
         }
     }
