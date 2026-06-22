@@ -15,6 +15,13 @@
         Padding="12"
         d:DataContext="{d:DesignInstance Type=viewmodel:LoginWindowViewModel}"
         Spacing="12">
+
+        <StackPanel.Resources>
+            <Style x:Name="ErrorInfoTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+        </StackPanel.Resources>
+
         <TextBlock
             FontSize="24"
             FontWeight="Bold"
@@ -24,21 +31,41 @@
             x:Name="AccountTextBox"
             PlaceholderText="请输入账号"
             Text="{Binding UserId, Mode=TwoWay}" />
+        <TextBlock
+            Foreground="Tomato"
+            Style="{StaticResource ErrorInfoTextBlockStyle}"
+            Text="{Binding UserIdValidationMessage}"
+            Visibility="{Binding UserIdValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" />
         <TextBlock Text="昵称" />
         <TextBox
             x:Name="NickNameTextBox"
             PlaceholderText="请输入昵称"
             Text="{Binding NickName, Mode=TwoWay}" />
+        <TextBlock
+            Foreground="Tomato"
+            Style="{StaticResource ErrorInfoTextBlockStyle}"
+            Text="{Binding NickNameValidationMessage}"
+            Visibility="{Binding NickNameValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" />
         <TextBlock Text="密码" />
         <TextBox
             x:Name="PasswordTextBox"
             PlaceholderText="请输入密码"
             Text="{Binding Password, Mode=TwoWay}" />
+        <TextBlock
+            Foreground="Tomato"
+            Style="{StaticResource ErrorInfoTextBlockStyle}"
+            Text="{Binding PasswordValidationMessage}"
+            Visibility="{Binding PasswordValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" />
         <TextBlock Text="确认密码" />
         <TextBox
             x:Name="PasswordAgainTextBox"
             PlaceholderText="请在此输入密码"
             Text="{Binding PasswordAgain, Mode=TwoWay}" />
+        <TextBlock
+            Foreground="Tomato"
+            Style="{StaticResource ErrorInfoTextBlockStyle}"
+            Text="{Binding PasswordAgainValidationMessage}"
+            Visibility="{Binding PasswordAgainValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" />
         <Button
             HorizontalAlignment="Stretch"
             Command="{Binding RegisterCommand}"

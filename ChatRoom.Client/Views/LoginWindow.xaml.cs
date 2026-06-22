@@ -26,7 +26,7 @@ namespace ChatRoom.Client.Views
             {
                 rootElement.Loaded += (s, e) => 
                 {
-                    SetLogicalSize(350, 500);
+                    SetLogicalSize(350, 580);
                 };
             }
         }

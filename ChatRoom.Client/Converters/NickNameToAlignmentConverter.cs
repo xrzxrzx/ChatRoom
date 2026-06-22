@@ -9,12 +9,12 @@ namespace ChatRoom.Client.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            var senderType = (MessageInfo.MessageInfoSenderType)value;
-            if (senderType == MessageInfo.MessageInfoSenderType.Self)
+            var senderType = (MessageInfoModel.MessageInfoSenderType)value;
+            if (senderType == MessageInfoModel.MessageInfoSenderType.Self)
             {
                 return HorizontalAlignment.Right;
             }
-            else if(senderType == MessageInfo.MessageInfoSenderType.System)
+            else if(senderType == MessageInfoModel.MessageInfoSenderType.System)
             {
                 return HorizontalAlignment.Center;
             }

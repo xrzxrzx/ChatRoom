@@ -11,12 +11,12 @@ namespace ChatRoom.Client.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            var senderType = (MessageInfo.MessageInfoSenderType)value;
-            if (senderType == MessageInfo.MessageInfoSenderType.System)
+            var senderType = (MessageInfoModel.MessageInfoSenderType)value;
+            if (senderType == MessageInfoModel.MessageInfoSenderType.System)
             {
                 return new SolidColorBrush(Colors.SlateBlue);
             }
-            else if(senderType == MessageInfo.MessageInfoSenderType.Self)
+            else if(senderType == MessageInfoModel.MessageInfoSenderType.Self)
             {
                 return new SolidColorBrush(new Windows.UI.Color() { A = 255, R = 0, G = 62, B = 102 });
             }

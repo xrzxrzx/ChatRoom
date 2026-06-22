@@ -1,5 +1,5 @@
-﻿using ChatRoom.Client.Core.Network;
-using ChatRoom.Client.Function.ChatRoom;
+﻿using ChatRoom.Client.Function.ChatRoom;
+using ChatRoom.Client.Messages;
 using ChatRoom.Client.Models;
 using ChatRoom.Client.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -7,15 +7,12 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ChatRoom.Client.ViewModels;
 
-public partial class MainWindowViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>
+public partial class MainWindowViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<AuthResultMessage>>
 {
     [ObservableProperty]
     public partial ObservableCollection<MessageInfoModel> MessageInfoList { get; set; } = new ObservableCollection<MessageInfoModel>();
@@ -25,7 +22,7 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
 
     [ObservableProperty]
     public partial MessageInfoModel SelectedMessage { get; set; } = new MessageInfoModel(0, string.Empty, string.Empty);
-    
+
     [ObservableProperty]
     public partial RoomInfoModel SelectedRoom { get; set; } = new RoomInfoModel(0, string.Empty, 0);
 
@@ -117,16 +114,16 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         MessageInfoList.Add(MessageInfoModel.FromOutputMessageInfo(message));
     }
 
-    public async void Receive(ValueChangedMessage<string> message)
+    public async void Receive(ValueChangedMessage<AuthResultMessage> message)
     {
-        if (message.Value == "登录成功")
+        if (message.Value.Action == AuthAction.Login && message.Value.Result == AuthResult.Success)
         {
             UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
                 Id = chatRoomService.GetUserId(),
                 NickName = chatRoomService.GetNickName()
             });
-            MessageInfoList.Add(new (0, string.Empty, message.Value));
+            MessageInfoList.Add(new(0, string.Empty, "登录成功"));
             RoomInfoList.Clear();
             var rooms = await chatRoomService.GetRoomListAsync();
             foreach (var room in rooms)
@@ -134,14 +131,14 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
                 RoomInfoList.Add(RoomInfoModel.FromRoomInfo(room));
             }
         }
-        else if (message.Value == "注册成功")
+        else if (message.Value.Action == AuthAction.Register && message.Value.Result == AuthResult.Success)
         {
             UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
                 Id = chatRoomService.GetUserId(),
                 NickName = chatRoomService.GetNickName()
             });
-            MessageInfoList.Add(new (0, string.Empty, message.Value));
+            MessageInfoList.Add(new(0, string.Empty, "注册成功"));
             RoomInfoList.Clear();
             var rooms = await chatRoomService.GetRoomListAsync();
             foreach (var room in rooms)
