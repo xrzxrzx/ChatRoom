@@ -7,7 +7,7 @@ namespace ChatRoom.Client.Core.Network
 {
     public interface IChatClientAPIService : IDisposable
     {
-        Task<ResponseMessageBag> CallAPIAsync(string apiName, IEnumerable<APIParameter> parameters);
+        Task<ResponseMessageBag> CallAPIAsync(string apiName, string token, IEnumerable<APIParameter> parameters);
         void OnResponseReceived(ResponseMessageBag messageBag);
 
         delegate Task SendMessageAsyncDelegate(string message);

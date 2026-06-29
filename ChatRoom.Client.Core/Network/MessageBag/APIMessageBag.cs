@@ -9,13 +9,14 @@ namespace ChatRoom.Client.Core.Network.MessageBag.APIMessageBag
 {
     public class RequestMessageBag
     {
-        private string command;
+        private string action;
         private Dictionary<string, object> parameters;
         private string echo = string.Empty;
+        private string token = string.Empty;
 
-        public RequestMessageBag(string command)
+        public RequestMessageBag(string action)
         {
-            this.command = command;
+            this.action = action;
             this.parameters = new Dictionary<string, object>();
         }
 
@@ -51,12 +52,20 @@ namespace ChatRoom.Client.Core.Network.MessageBag.APIMessageBag
             return this;
         }
 
+        public RequestMessageBag SetToken(string token)
+        {
+            this.token = token;
+            return this;
+        }
+
         public string ToJsonString()
         {
             var dict = new Dictionary<string, object>
             {
-                { "command", command },
-                { "params", parameters }
+                { "action", action },
+                { "params", parameters },
+                { "echo", echo },
+                { "token", token }
             };
             return JsonConvert.SerializeObject(dict);
         }
@@ -75,7 +84,7 @@ namespace ChatRoom.Client.Core.Network.MessageBag.APIMessageBag
         {
             Echo = recvJson["echo"]?.ToString() ?? string.Empty;
             Recode = recvJson.Value<int?>("recode") ?? 0;
-            ErrorMessage = recvJson.Value<string>("msg") ?? string.Empty;
+            ErrorMessage = recvJson.Value<string>("message") ?? string.Empty;
             Data = recvJson.Value<JObject>("data") ?? new JObject();
             RawJson = recvJson ?? new JObject();
         }

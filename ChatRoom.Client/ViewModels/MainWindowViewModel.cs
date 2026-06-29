@@ -76,14 +76,6 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         loginWindow.Activate();
     }
 
-    private bool CanConnect { get; set; } = true;
-    [RelayCommand(CanExecute = nameof(CanConnect))]
-    private async Task ConnectAsync()
-    {
-        CanConnect = false;
-        chatRoomService.ConnectToServer();
-    }
-
     [RelayCommand]
     private async Task SendMessageAsync()
     {

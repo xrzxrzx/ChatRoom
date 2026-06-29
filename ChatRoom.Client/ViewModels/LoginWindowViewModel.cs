@@ -110,6 +110,9 @@ namespace ChatRoom.Client.ViewModels
             set => SetProperty(ref passwordAgainValidationMessage, value);
         }
 
+        [ObservableProperty]
+        public partial string ServerErrorMessage { get; set; } = string.Empty;
+
         IChatRoomService chatRoomService;
 
         public LoginWindowViewModel(IChatRoomService chatRoomService)
@@ -120,6 +123,8 @@ namespace ChatRoom.Client.ViewModels
         [RelayCommand]
         private async Task LoginAsync()
         {
+            ServerErrorMessage = string.Empty;
+
             ValidateProperty(UserId, nameof(UserId));
             ValidateProperty(Password, nameof(Password));
             UserIdValidationMessage = GetFirstErrorMessage(nameof(UserId));
@@ -133,6 +138,13 @@ namespace ChatRoom.Client.ViewModels
             if (!int.TryParse(UserId, out var userId))
             {
                 UserIdValidationMessage = "用户ID必须为正整数";
+                return;
+            }
+
+            var connectResult = await chatRoomService.ConnectToServer();
+            if (!connectResult)
+            {
+                ServerErrorMessage = "连接服务器失败";
                 return;
             }
 
@@ -151,6 +163,8 @@ namespace ChatRoom.Client.ViewModels
         [RelayCommand]
         private async Task RegisterAsync()
         {
+            ServerErrorMessage = string.Empty;
+
             ValidateAllProperties();
             UserIdValidationMessage = GetFirstErrorMessage(nameof(UserId));
             NickNameValidationMessage = GetFirstErrorMessage(nameof(NickName));
@@ -165,6 +179,13 @@ namespace ChatRoom.Client.ViewModels
             if (!int.TryParse(UserId, out var userId))
             {
                 UserIdValidationMessage = "用户ID必须为正整数";
+                return;
+            }
+
+            var connectResult = await chatRoomService.ConnectToServer();
+            if (!connectResult)
+            {
+                ServerErrorMessage = "连接服务器失败";
                 return;
             }
 

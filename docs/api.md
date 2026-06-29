@@ -5,7 +5,7 @@
 
 ```JSON
 {
-	command: "命令",
+	actino: "命令",
 	params: 
 	{
 		"key1": "value1" ,
@@ -22,7 +22,7 @@
 ```JSON
 {
 	recode: 返回的状态码（没有错误时为0）,
-	msg: "返回的错误消息（没有错误时为空）",
+	message: "返回的错误消息（没有错误时为空）",
 	data:
 	{
 		"key1": "value1" ,
@@ -84,6 +84,7 @@
 | ------- | ------- | ------- |
 | room_id |  `int32` |   房间ID |
 | room_name |  `string` |   房间名称 |
+| user_count |  `int32` |   房间人数 |
 
 ***
 

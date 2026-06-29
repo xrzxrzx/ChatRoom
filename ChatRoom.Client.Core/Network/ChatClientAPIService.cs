@@ -20,10 +20,10 @@ namespace ChatRoom.Client.Core.Network
             this.logger = logger;
         }
 
-        public async Task<ResponseMessageBag> CallAPIAsync(string apiName, IEnumerable<APIParameter> parameters)
+        public async Task<ResponseMessageBag> CallAPIAsync(string apiName, string token, IEnumerable<APIParameter> parameters)
         {
             string echo = Guid.NewGuid().ToString();
-            RequestMessageBag messageBag = new RequestMessageBag(apiName).SetEcho(echo);
+            RequestMessageBag messageBag = new RequestMessageBag(apiName).SetEcho(echo).SetToken(token);
 
             foreach(var param in parameters)
             {
@@ -41,11 +41,17 @@ namespace ChatRoom.Client.Core.Network
             {
                 return await tcs.Task.WaitAsync(cts.Token);
             }
-            catch (TimeoutException)
+            catch (TaskCanceledException)
             {
                 logger.Warning($"API '{apiName}' 调用超时 (10秒), Echo: {echo}");
                 _responseWaiters.TryRemove(echo, out _); // 清理超时的任务
                 return new ResponseMessageBag(false, "API 调用超时");
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Warning($"API '{apiName}' 调用被取消, Echo: {echo}");
+                _responseWaiters.TryRemove(echo, out _); // 清理被取消的任务
+                return new ResponseMessageBag(false, "API 调用被取消");
             }
         }
 

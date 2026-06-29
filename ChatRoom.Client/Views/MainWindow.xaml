@@ -68,13 +68,6 @@
                         </StackPanel>
                     </Grid>
 
-                    <Button
-                        x:Name="ConnectButton"
-                        HorizontalAlignment="Stretch"
-                        Command="{Binding DataContext.ConnectCommand, ElementName=ConnectButton}">
-                        连接服务器
-                    </Button>
-
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />

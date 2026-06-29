@@ -45,6 +45,12 @@
             Style="{StaticResource ErrorInfoTextBlockStyle}"
             Text="{Binding PasswordValidationMessage}"
             Visibility="{Binding PasswordValidationMessage, Converter={StaticResource StringToVisibilityConverter}}" />
+        <TextBlock
+            Margin="0,6,0,0"
+            Foreground="Tomato"
+            Style="{StaticResource ErrorInfoTextBlockStyle}"
+            Text="{Binding ServerErrorMessage}"
+            Visibility="{Binding ServerErrorMessage, Converter={StaticResource StringToVisibilityConverter}}" />
         <Button
             HorizontalAlignment="Stretch"
             Command="{Binding LoginCommand}"

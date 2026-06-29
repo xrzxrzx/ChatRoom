@@ -60,7 +60,7 @@ namespace ChatRoom.Client.Core.Network
                     _logger.Warning($"连接服务器失败 (尝试 {attempt}/{maxAttempts}): {ex.Message}");
                 }
             }
-
+            _logger.Error($"连接服务器失败，已尝试 {maxAttempts} 次。");
             return false;
         }
 
@@ -69,9 +69,9 @@ namespace ChatRoom.Client.Core.Network
             _coreService.StartReceive();
         }
 
-        public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
+        public async Task<ResponseMessageBag> CallAPIAsync(string apiName, string token, params APIParameter[] parameters)
         {
-            return await _apiService.CallAPIAsync(apiName, parameters);
+            return await _apiService.CallAPIAsync(apiName, token, parameters);
         }
 
         public void Dispose()

@@ -1,4 +1,5 @@
 ﻿#include "UserSession.h"
+#include"StringTool.hpp"
 
 #include<spdlog/spdlog.h>
 #include<nlohmann/json.hpp>
@@ -23,11 +24,13 @@ void UserSession::Init(boost::asio::ip::tcp::socket socket)
 {
 	this->socket = std::move(socket);
 
-	asio::async_read_until(socket, readBuffer, '\n',
+	asio::async_read_until(this->socket, readBuffer, '\n',
 		[this](boost::system::error_code ec, std::size_t bytes_transferred)
 		{
 			if (!ec)
 			{
+				spdlog::info("接收到新用户连接 {}", this->socket.remote_endpoint().address().to_string());
+
 				std::istream is(&readBuffer);
 				string line;
 				std::getline(is, line);
@@ -35,12 +38,12 @@ void UserSession::Init(boost::asio::ip::tcp::socket socket)
 				if (requestBag.GetAction() == "login")
 				{
 					spdlog::info("用户请求登录");
-					HandleLogin(requestBag.GetData()["user_id"], requestBag.GetData()["password"], requestBag.GetEcho());
+					HandleLogin(requestBag.GetParams()["user_id"], requestBag.GetParams()["password"], requestBag.GetEcho());
 				}
 				else if (requestBag.GetAction() == "register")
 				{
 					spdlog::info("用户请求注册");
-					HandleRegister(requestBag.GetData()["password"], requestBag.GetData()["nickname"], requestBag.GetEcho());
+					HandleRegister(requestBag.GetParams()["password"], requestBag.GetParams()["nickname"], requestBag.GetEcho());
 				}
 				else
 				{
@@ -49,7 +52,7 @@ void UserSession::Init(boost::asio::ip::tcp::socket socket)
 			}
 			else
 			{
-				spdlog::error("接收消息出错: {}", ec.message());
+				spdlog::error("接收消息出错: {}", ToUtf8(ec.message()));
 			}
 		});
 }
@@ -97,7 +100,7 @@ void UserSession::do_read()
 			}
 			else
 			{
-				spdlog::error("接收消息出错: {}", ec.message());
+				spdlog::error("接收消息出错: {}", ToUtf8(ec.message()));
 			}
 		});
 }
@@ -112,7 +115,7 @@ void UserSession::HandleLogin(int userId, const string& password, const string& 
 	if (rpcResponse.success() == false)
 	{
 		spdlog::error("用户登录失败，userId: {}", userId);
-		responseBag.SetError(1, "登录失败");
+		responseBag.SetError(1, "登录失败，用户ID或密码错误");
 		DeliverResponse(responseBag);
 
 		boost::system::error_code ec;
@@ -138,7 +141,7 @@ void UserSession::HandleRegister(const string& password, const string& nickname,
 	if (rpcResponse.success() == false)
 	{
 		spdlog::error("用户注册失败，nickname: {}", nickname);
-		responseBag.SetError(1, "注册失败");
+		responseBag.SetError(1, "注册失败，昵称已被占用");
 		DeliverResponse(responseBag);
 		boost::system::error_code ec;
 		socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
@@ -196,7 +199,7 @@ void UserSession::HandleSendMessage(const RequestBag& requestBag)
 		return;
 	}
 
-	auto& message = requestBag.GetData()["message"];
+	auto& message = requestBag.GetParams()["message"];
 	responseBag.AddData("message", message);
 	DeliverResponse(responseBag);
 
@@ -217,7 +220,7 @@ void UserSession::HandleGetRoomList(const RequestBag & requestBag)
 	json roomList = json::array();
 	for (auto& [roomId, room] : server.chatRoomMap)
 	{
-		roomList.push_back({ {"room_id", roomId}, {"room_name", room.GetName()} });
+		roomList.push_back({ {"room_id", roomId}, {"room_name", room.GetName()}, {"user_count", room.GetUserCount()} });
 	}
 
 	responseBag.AddData("room_info_list", roomList);
@@ -231,7 +234,7 @@ void UserSession::HandleJoinRoom(const RequestBag& requestBag)
 	if (ValidateToken(requestBag.GetToken(), responseBag))
 		return;
 
-	auto& roomId = requestBag.GetData()["room_id"];
+	auto& roomId = requestBag.GetParams()["room_id"];
 	bool success = server.JoinChatRoom(roomId, shared_from_this());
 	if (!success)
 	{

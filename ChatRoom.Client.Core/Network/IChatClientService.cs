@@ -10,7 +10,7 @@ namespace ChatRoom.Client.Core.Network
     {
         public Task<bool> ConnectAsync();
         public void StartReceiving();
-        public Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
+        public Task<ResponseMessageBag> CallAPIAsync(string apiName, string token, params APIParameter[] parameters);
         public void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag;
     }
 }

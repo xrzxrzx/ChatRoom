@@ -14,13 +14,13 @@ namespace APIMessageBag
 		RequestBag(string rawMessage);
 
 		string GetAction() const { return action; }
-		json GetData() const { return data; }
+		json GetParams() const { return params; }
 		string GetEcho() const { return echo; }
 		string GetToken() const { return token; }
 
 	private:
 		string action;
-		json data;
+		json params;
 		string token;
 		string echo;
 	};

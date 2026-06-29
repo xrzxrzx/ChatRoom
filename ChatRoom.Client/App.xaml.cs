@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Serilog;
 using Serilog.Core;
 using System;
+using System.IO;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -41,12 +42,14 @@ namespace ChatRoom.Client
             var services = new ServiceCollection();
 
             //日志服务
+            var logPath = Path.Combine(AppContext.BaseDirectory, "logs", "chatclient.log");
+
             services.AddSingleton<ILogger>(_ => 
             {
                 return new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
-                .WriteTo.File("logs/chatclient.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
                 .CreateLogger();
             });
 

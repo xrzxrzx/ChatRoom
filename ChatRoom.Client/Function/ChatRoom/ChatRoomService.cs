@@ -28,20 +28,21 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
     {
-        return await chatClientService.CallAPIAsync(apiName, parameters);
+        return await chatClientService.CallAPIAsync(apiName, string.Empty, parameters);
     }
 
-    public async void ConnectToServer()
+    public async Task<bool> ConnectToServer()
     {
 
         var result = await chatClientService.ConnectAsync();
         if (result == false)
         {
             OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "连接服务器失败"));
-            return;
+            return result;
         }
 
         chatClientService.StartReceiving();
+        return true;
     }
 
     public void DisconnectToServer()
@@ -51,7 +52,8 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<bool> RegisterAsync(int user_id, string password, string nickname)
     {
-        var response = await chatClientService.CallAPIAsync("register", new("user_id", user_id),
+        var response = await chatClientService.CallAPIAsync("register", string.Empty, 
+                                        new("user_id", user_id),
                                                  new("password", password),
                                                  new("nickname", nickname));
         if (response.Success == false)
@@ -66,7 +68,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<bool> LogInAsync(int userId, string password)
     {
-        var response = await chatClientService.CallAPIAsync("login",
+        var response = await chatClientService.CallAPIAsync("login", string.Empty,
                                            new("user_id", userId),
                                                     new("password", password));
         if (response.Success == false)
@@ -81,7 +83,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<bool> JoinRoomAsync(int roomId)
     {
-        var response = await chatClientService.CallAPIAsync("join_room", new APIParameter("room_id", roomId));
+        var response = await chatClientService.CallAPIAsync("join_room", string.Empty, new APIParameter("room_id", roomId));
         if (response.Success == false)
         {
             OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"加入房间失败: {response.ErrorMessage}"));
@@ -92,7 +94,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task SendMessageAsync(string message)
     {
-        var response = await chatClientService.CallAPIAsync("send_message", new APIParameter("sender", userInfo.Id),
+        var response = await chatClientService.CallAPIAsync("send_message", string.Empty, new APIParameter("sender", userInfo.Id),
                                                  new APIParameter("message", message));
 
         if (response.Success == false)
@@ -122,7 +124,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<List<RoomInfo>> GetRoomListAsync()
     {
-        var response = await chatClientService.CallAPIAsync("get_room_list");
+        var response = await chatClientService.CallAPIAsync("get_room_list", string.Empty);
 
         if (!response.Success)
         {

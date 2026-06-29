@@ -157,6 +157,7 @@
     <ClInclude Include="ChatServerService.h" />
     <ClInclude Include="di.hpp" />
     <ClInclude Include="EventMessageBag.h" />
+    <ClInclude Include="StringTool.hpp" />
     <ClInclude Include="UserSession.h" />
     <ClInclude Include="UserSessionServiceClient.h" />
   </ItemGroup>
@@ -167,10 +168,9 @@
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
-      <ErrorText>��̨�������ȱ�ٴ���Ŀ���õ�?NuGet �������ʹ�á�NuGet �������ԭ����������Щ��������йظ�����Ϣ����μ�?http://go.microsoft.com/fwlink/?LinkID=322105��ȱ�ٵ��ļ��� {0}��</ErrorText>
+      <ErrorText>��̨�������ȱ�ٴ���Ŀ���õ�?NuGet �������ʹ�á�NuGet �������ԭ����������Щ��������йظ�����Ϣ����μ�?http://go.microsoft.com/fwlink/?LinkID=322105��ȱ�ٵ��ļ��� {0}��</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\boost.1.87.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.87.0\build\boost.targets'))" />
     <Error Condition="!Exists('..\packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets'))" />
   </Target>
 </Project>
-

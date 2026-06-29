@@ -46,6 +46,12 @@
     <Filter Include="Protos">
       <UniqueIdentifier>{e21cd26e-5e57-4f0e-80dd-4c595bcb0d90}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{a9f417e0-cabe-4368-906b-5d39b3cad639}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\tools">
+      <UniqueIdentifier>{0ff44664-7a67-4943-9149-61e1fd81c8ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -106,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="..\Protos\gRPCOut\gRPCUserSession.grpc.pb.h">
       <Filter>Protos</Filter>
+    </ClInclude>
+    <ClInclude Include="StringTool.hpp">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

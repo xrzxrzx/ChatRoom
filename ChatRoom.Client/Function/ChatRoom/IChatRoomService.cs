@@ -11,7 +11,7 @@ namespace ChatRoom.Client.Function.ChatRoom
     {
         int GetUserId();
         string GetNickName();
-        void ConnectToServer();
+        Task<bool> ConnectToServer();
         void DisconnectToServer();
         Task SendMessageAsync(string message);
         Task<bool> LogInAsync(int userId, string password);

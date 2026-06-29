@@ -22,6 +22,7 @@ public:
 
 	string GetName() const { return name; }
 	int GetId() const { return id; }
+	int GetUserCount() const { return participants.size(); }
 
 private:
 	string name;

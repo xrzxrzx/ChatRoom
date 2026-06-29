@@ -1,5 +1,5 @@
 ServerIp: 127.0.0.1
-ServerPort: 5000
+ServerPort: 12345
 
 ConnectionRetryCount: 3
 ConnectionTimeout: 5000

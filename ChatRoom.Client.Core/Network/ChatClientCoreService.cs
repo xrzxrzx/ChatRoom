@@ -43,7 +43,7 @@ namespace ChatRoom.Client.Core.Network
                 return;
 
             NetworkStream stream = tcpClient.GetStream();
-            byte[] buffer = Encoding.UTF8.GetBytes(message);
+            byte[] buffer = Encoding.UTF8.GetBytes(message + "\n");
             await stream.WriteAsync(buffer, 0, buffer.Length);
         }
 

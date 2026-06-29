@@ -1,4 +1,5 @@
 ﻿#include "ChatServerService.h"
+#include"StringTool.hpp"
 
 #include<spdlog/spdlog.h>
 #include"UserSession.h"
@@ -43,7 +44,7 @@ void ChatServerService::do_accept()
 			}
 			else
 			{
-				spdlog::error("Accept error: {}", ec.message());
+				spdlog::error("Accept error: {}", ToUtf8(ec.message()));
 			}
 			do_accept();
 		});

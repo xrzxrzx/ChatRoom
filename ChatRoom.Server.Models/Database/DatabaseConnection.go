@@ -2,9 +2,10 @@ package Database
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
@@ -21,7 +22,7 @@ func InitDB() error {
 
 	dsn := "root:612278@tcp(127.0.0.1:3306)/chat_service?charset=utf8mb4&parseTime=True&loc=Local"
 
-	db, err := sql.Open("mysql", dsn)
+	db, err = sql.Open("mysql", dsn)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ APIMessageBag::RequestBag::RequestBag(string rawMessage)
 {
 	json jsonMessage = json::parse(rawMessage);
 	action = jsonMessage["action"].get<string>();
-	data = jsonMessage["data"];
+	params = jsonMessage["params"];
 	echo = jsonMessage["echo"].get<string>();
 }
 
