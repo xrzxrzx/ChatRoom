@@ -2,7 +2,6 @@ package Database
 
 import (
 	"database/sql"
-	"fmt"
 	"regexp"
 	"testing"
 

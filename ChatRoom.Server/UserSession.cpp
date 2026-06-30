@@ -60,7 +60,7 @@ void UserSession::Init(boost::asio::ip::tcp::socket socket)
 void UserSession::Deliver(const string& message)
 {
 	bool write_in_progress = !writeQueue.empty();
-	writeQueue.push(message);
+	writeQueue.push(message + "\n");
 	if (!write_in_progress) {
 		do_write();
 	}
