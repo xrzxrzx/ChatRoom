@@ -19,7 +19,7 @@ public class MessageInfoModel
     public string Message { get; set; }
     public MessageInfoSenderType SenderType { get; set; }
 
-    public MessageInfoModel(int senderId, string senderNickName, string message, bool isSelf = false)
+    private MessageInfoModel(int senderId, string senderNickName, string message, bool isSelf = false)
     {
 
         SenderId = senderId;
@@ -28,12 +28,27 @@ public class MessageInfoModel
         SenderType = isSelf ? MessageInfoSenderType.Self : MessageInfoSenderType.OtherUser;
     }
 
-    public MessageInfoModel(string message)
+    private MessageInfoModel(string message)
     {
         SenderId = -1;
         SenderNickName = "System";
         Message = message;
         SenderType = MessageInfoSenderType.System;
+    }
+
+    public static MessageInfoModel NewSystemMessage(string message)
+    {
+        return new MessageInfoModel(message);
+    }
+
+    public static MessageInfoModel NewOtherUserMessage(int senderId, string senderNickName, string message)
+    {
+        return new MessageInfoModel(senderId, senderNickName, message);
+    }
+
+    public static MessageInfoModel NewSelfMessage(int senderId, string senderNickName, string message)
+    {
+        return new MessageInfoModel(senderId, senderNickName, message, true);
     }
 
     public static MessageInfoModel FromOutputMessageInfo(OutputMessageInfo outputMessageInfo)

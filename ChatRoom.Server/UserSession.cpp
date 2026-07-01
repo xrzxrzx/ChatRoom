@@ -18,6 +18,13 @@ UserSession::UserSession(ChatServerService& server, IUserSessionServiceClient& u
 {
 	userId = 0;
 	nickname = "";
+
+	apiHandlers = {
+		{"send_message", [this](const RequestBag& requestBag) { HandleSendMessage(requestBag); }},
+		{"get_room_list", [this](const RequestBag& requestBag) { HandleGetRoomList(requestBag); }},
+		{"join_room",     [this](const RequestBag& requestBag) { HandleJoinRoom(requestBag); }},
+		{"request",       [this](const RequestBag& requestBag) { HandleRequest(requestBag); }},
+	};
 }
 
 void UserSession::Init(boost::asio::ip::tcp::socket socket)
@@ -47,7 +54,8 @@ void UserSession::Init(boost::asio::ip::tcp::socket socket)
 				}
 				else
 				{
-					// TODO : 处理其他接口调用，用户仅能调用一次 login 或 register 接口，否则会被服务器断开连接
+					spdlog::error("用户未登录 {}", this->socket.remote_endpoint().address().to_string());
+					HandleUnauthorized(requestBag.GetEcho());
 				}
 			}
 			else
@@ -97,6 +105,8 @@ void UserSession::do_read()
 				std::getline(is, line);
 				RequestBag requestBag(line);
 				HandleAPIRequest(requestBag);
+				//继续监听客户端请求
+				do_read();
 			}
 			else
 			{
@@ -126,6 +136,9 @@ void UserSession::HandleLogin(int userId, const string& password, const string& 
 
 	this->nickname = rpcResponse.nickname();
 
+	//继续监听客户端请求
+	do_read();
+
 	responseBag.AddData("session_token", rpcResponse.session_token());
 	responseBag.AddData("nickname", this->nickname);
 	DeliverResponse(responseBag);
@@ -152,10 +165,23 @@ void UserSession::HandleRegister(const string& password, const string& nickname,
 	this->userId = rpcResponse.user_id();
 	this->nickname = nickname;
 
+	//继续监听客户端请求
+	do_read();
+
 	responseBag.AddData("user_id", rpcResponse.user_id());
 	responseBag.AddData("session_token", rpcResponse.session_token());
 	responseBag.AddData("nickname", this->nickname);
 	DeliverResponse(responseBag);
+}
+
+void UserSession::HandleUnauthorized(const string& echo)
+{
+	ResponseBag responseBag(echo);
+	responseBag.SetError(401, "用户未登录");
+	DeliverResponse(responseBag);
+	boost::system::error_code ec;
+	socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+	socket.close(ec);
 }
 
 //不允许用户在调用 login 或 register 接口前调用
@@ -163,34 +189,25 @@ void UserSession::HandleAPIRequest(const RequestBag& requestBag)
 {
 	ResponseBag responseBag(requestBag.GetEcho());
 
-	if (ValidateToken(requestBag.GetToken(), responseBag))
+	if (!ValidateToken(requestBag.GetToken(), responseBag))
 		return;
 
-	auto action = requestBag.GetAction();
-	if (action == "send_message")
-	{
-		HandleSendMessage(requestBag);
+	auto it = apiHandlers.find(requestBag.GetAction());
+	if (it != apiHandlers.end()) {
+		spdlog::info("处理 API 操作: {}", requestBag.GetAction());
+		it->second(requestBag);
 	}
-	else if (action == "get_room_list")
-	{
-		HandleGetRoomList(requestBag);
-	}
-	else if (action == "join_room")
-	{
-		HandleJoinRoom(requestBag);
-	}
-	else if(action == "request")
-	{
-		HandleRequest(requestBag);
+	else {
+		// 处理未知 API 操作
+		spdlog::error("未知的 API 操作: {}", requestBag.GetAction());
+		responseBag.SetError(404, "未知的 API 操作");
+		Deliver(responseBag.ToJsonString());
 	}
 }
 
 void UserSession::HandleSendMessage(const RequestBag& requestBag)
 {
 	ResponseBag responseBag(requestBag.GetEcho());
-
-	if (ValidateToken(requestBag.GetToken(), responseBag))
-		return;
 
 	if (currentChatRoom == nullptr)
 	{
@@ -214,9 +231,6 @@ void UserSession::HandleGetRoomList(const RequestBag & requestBag)
 {
 	ResponseBag responseBag(requestBag.GetEcho());
 
-	if (ValidateToken(requestBag.GetToken(), responseBag))
-		return;
-
 	json roomList = json::array();
 	for (auto& [roomId, room] : server.chatRoomMap)
 	{
@@ -230,9 +244,6 @@ void UserSession::HandleGetRoomList(const RequestBag & requestBag)
 void UserSession::HandleJoinRoom(const RequestBag& requestBag)
 {
 	ResponseBag responseBag(requestBag.GetEcho());
-
-	if (ValidateToken(requestBag.GetToken(), responseBag))
-		return;
 
 	auto& roomId = requestBag.GetParams()["room_id"];
 	bool success = server.JoinChatRoom(roomId, shared_from_this());

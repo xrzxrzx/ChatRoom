@@ -54,10 +54,16 @@ public class ChatClientCoreService : IChatClientCoreService
     public async Task SendMessageAsync(string message)
     {
         if (disposed)
+        {
+            logger.Warning("尝试在已释放的 ChatClientCoreService 上发送消息。");
             return;
+        }
 
         if (networkStream is null)
+        {
+            logger.Warning("网络流未初始化，无法发送消息。");
             return;
+        }
 
         byte[] buffer = Encoding.UTF8.GetBytes(message + "\n");
         await networkStream.WriteAsync(buffer, 0, buffer.Length);

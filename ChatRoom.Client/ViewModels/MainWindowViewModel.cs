@@ -21,7 +21,7 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
     public partial ObservableCollection<RoomInfoModel> RoomInfoList { get; set; } = new ObservableCollection<RoomInfoModel>();
 
     [ObservableProperty]
-    public partial MessageInfoModel SelectedMessage { get; set; } = new MessageInfoModel(0, string.Empty, string.Empty);
+    public partial MessageInfoModel SelectedMessage { get; set; } = MessageInfoModel.NewSystemMessage(string.Empty);
 
     [ObservableProperty]
     public partial RoomInfoModel SelectedRoom { get; set; } = new RoomInfoModel(0, string.Empty, 0);
@@ -115,7 +115,7 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
                 Id = chatRoomService.GetUserId(),
                 NickName = chatRoomService.GetNickName()
             });
-            MessageInfoList.Add(new(0, string.Empty, "登录成功"));
+            MessageInfoList.Add(MessageInfoModel.NewSystemMessage("登录成功"));
             RoomInfoList.Clear();
             var rooms = await chatRoomService.GetRoomListAsync();
             foreach (var room in rooms)
@@ -130,7 +130,7 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
                 Id = chatRoomService.GetUserId(),
                 NickName = chatRoomService.GetNickName()
             });
-            MessageInfoList.Add(new(0, string.Empty, "注册成功"));
+            MessageInfoList.Add(MessageInfoModel.NewSystemMessage("注册成功"));
             RoomInfoList.Clear();
             var rooms = await chatRoomService.GetRoomListAsync();
             foreach (var room in rooms)

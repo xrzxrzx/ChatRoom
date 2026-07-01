@@ -3,6 +3,7 @@
 #include<memory>
 #include<queue>
 #include<string>
+#include<unordered_map>
 #include<boost/asio.hpp>
 
 #include"APIMessageBag.h"
@@ -41,6 +42,10 @@ private:
 	IUserSessionServiceClient& gRPCServiceClient;
 	friend class ChatServerService;
 
+	//API请求处理
+	using APIHandler = std::function<void(const RequestBag&)>;
+	std::unordered_map<string, APIHandler> apiHandlers;
+
 	//用户信息
 	int userId;
 	string nickname;
@@ -53,6 +58,7 @@ private:
 
 	void HandleLogin(int userId, const string& password, const string& echo);
 	void HandleRegister(const string& password, const string& nickname, const string& echo);
+	void HandleUnauthorized(const string& echo);
 
 	void HandleAPIRequest(const RequestBag& requestBag);
 	void HandleSendMessage(const RequestBag& requestBag);

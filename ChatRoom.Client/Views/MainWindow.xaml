@@ -54,7 +54,7 @@
                         <PersonPicture
                             Grid.Column="0"
                             Width="50"
-                            DisplayName="{Binding NickName}" />
+                            DisplayName="{Binding UserInfo.NickName}" />
 
                         <StackPanel Grid.Column="1">
                             <TextBlock

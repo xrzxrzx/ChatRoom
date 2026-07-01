@@ -149,14 +149,18 @@ namespace ChatRoom.Client.ViewModels
             }
 
             var result = await chatRoomService.LogInAsync(userId, Password);
-            if (result)
+            if (result)//登录成功
             {
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<AuthResultMessage>(
-                    new AuthResultMessage { 
+                    new AuthResultMessage
+                    {
                         Action = AuthAction.Login,
                         Result = AuthResult.Success
                     }));
+                return;
             }
+
+            ServerErrorMessage = "登录失败";
         }
 
 
@@ -190,14 +194,18 @@ namespace ChatRoom.Client.ViewModels
             }
 
             var result = await chatRoomService.RegisterAsync(userId, Password, NickName);
-            if(result)
+            if (result)
             {
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<AuthResultMessage>(
-                    new AuthResultMessage { 
+                    new AuthResultMessage
+                    {
                         Action = AuthAction.Register,
                         Result = AuthResult.Success
                     }));
+                return;
             }
+
+            ServerErrorMessage = "注册失败";
         }
 
         private string GetFirstErrorMessage(string propertyName)

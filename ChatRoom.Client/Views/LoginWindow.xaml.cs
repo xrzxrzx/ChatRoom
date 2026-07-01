@@ -1,4 +1,7 @@
 using ChatRoom.Client.Views.LoginWindowPages;
+using ChatRoom.Client.Messages;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -29,6 +32,16 @@ namespace ChatRoom.Client.Views
                     SetLogicalSize(350, 580);
                 };
             }
+
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<AuthResultMessage>>(this, (_, message) =>
+            {
+                if (message.Value.Result == AuthResult.Success)
+                {
+                    Close();
+                }
+            });
+
+            Closed += (_, _) => WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 
         private void SetLogicalSize(double logicalWidth, double logicalHeight)
