@@ -21,11 +21,14 @@ public class ChatClientCoreService : IChatClientCoreService
 
     public event IChatClientCoreService.OnEventReceivedHandler? OnEventReceived;
     public event IChatClientCoreService.OnResponseReceivedHandler? OnResponseReceived;
+    public event IChatClientCoreService.ReconnectHandler? Reconnect;
 
     public ChatClientCoreService(ILogger logger)
     {
         tcpClient = new TcpClient();
         this.logger = logger;
+
+        Reconnect += ResetConnection;
     }
 
     public async Task ConnectAsync(ChatClientConfig chatClientConfig)
@@ -140,7 +143,7 @@ public class ChatClientCoreService : IChatClientCoreService
         }
         finally
         {
-            ResetConnection();//重置连接状态
+            Reconnect?.Invoke();//重置连接状态
             receiveTask = null;
             receiveCancellationTokenSource?.Dispose();
             receiveCancellationTokenSource = null;

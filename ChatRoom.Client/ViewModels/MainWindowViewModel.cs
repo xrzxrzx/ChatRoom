@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace ChatRoom.Client.ViewModels;
@@ -40,9 +41,26 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         this.chatRoomService.OutputMessage += OnMessageReceived;
 
         IsActive = true;
+
+        chatRoomService.OnLoginStatusChanged += OnLoginStatusChanged;
+        IsLoggedIn = chatRoomService.IsLoggedIn;
     }
 
-    [RelayCommand]
+    private bool isLoggedIn;
+    public bool IsLoggedIn
+    {
+        get => isLoggedIn;
+        set => SetProperty(ref isLoggedIn, value);
+    }
+
+    private void OnLoginStatusChanged()
+    {
+        IsLoggedIn = chatRoomService.IsLoggedIn;
+        OnPropertyChanged(nameof(CanLogin));
+    }
+
+    private bool CanLogin => !IsLoggedIn;
+    [RelayCommand(CanExecute = nameof(CanLogin))]
     private async Task LoginAsync(string logType)
     {
         var loginWindow = App.Current.ServiceProvider.GetRequiredService<LoginWindow>();
@@ -76,7 +94,18 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         loginWindow.Activate();
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanLogin))]
+    private async Task LogoutAsync()
+    {
+        //await chatRoomService.LogoutAsync();
+        IsLoggedIn = false;
+        UserInfo = new UserInfoModel(0, "未登录");
+        MessageInfoList.Clear();
+        RoomInfoList.Clear();
+        MessageInfoList.Add(MessageInfoModel.NewSystemMessage("已退出登录"));
+    }
+
+    [RelayCommand(CanExecute = nameof(CanLogin))]
     private async Task SendMessageAsync()
     {
         if (!string.IsNullOrWhiteSpace(InputMessage))
@@ -110,6 +139,7 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
     {
         if (message.Value.Action == AuthAction.Login && message.Value.Result == AuthResult.Success)
         {
+            IsLoggedIn = true;
             UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
                 Id = chatRoomService.GetUserId(),
@@ -125,6 +155,7 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         }
         else if (message.Value.Action == AuthAction.Register && message.Value.Result == AuthResult.Success)
         {
+            IsLoggedIn = true;
             UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
                 Id = chatRoomService.GetUserId(),

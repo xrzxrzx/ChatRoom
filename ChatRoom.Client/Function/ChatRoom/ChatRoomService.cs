@@ -11,19 +11,37 @@ namespace ChatRoom.Client.Function.ChatRoom;
 public class ChatRoomService : IChatRoomService
 {
     private IChatClientService chatClientService;
+    private ILogger logger;
     private UserInfo userInfo;
 
+    private bool isLoggedIn = false;
+    public bool IsLoggedIn
+    {
+        get => isLoggedIn;
+        private set
+        {
+            if (isLoggedIn != value)
+            {
+                isLoggedIn = value;
+                OnLoginStatusChanged?.Invoke();
+            }
+        }
+    }
+
     public event IChatRoomService.OutputMessageDelegate? OutputMessage;
+    public event IChatRoomService.OnLoginStatusChangedDelegate? OnLoginStatusChanged;
 
     public ChatRoomService(IChatClientService chatClientService, ILogger logger)
     {
         this.chatClientService = chatClientService;
+        this.logger = logger;
         userInfo = new UserInfo();
 
         ChatRoomFunction.SetLogger(logger);
         ChatRoomFunction.SetOutputMessageDelegate(message => OutputMessage?.Invoke(message));
 
         this.chatClientService.SubscribeToEvent<MessageEvent>(ChatRoomFunction.OutputMessage);
+        this.chatClientService.AddReconnectHandler(ReconnectHandler);
     }
 
     public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
@@ -52,7 +70,13 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<bool> RegisterAsync(int user_id, string password, string nickname)
     {
-        var response = await chatClientService.CallAPIAsync("register", string.Empty, 
+        if (IsLoggedIn)
+        {
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "已登录，无法注册新用户"));
+            return false;
+        }
+
+        var response = await chatClientService.CallAPIAsync("register", string.Empty,
                                         new("user_id", user_id),
                                                  new("password", password),
                                                  new("nickname", nickname));
@@ -63,11 +87,20 @@ public class ChatRoomService : IChatRoomService
         }
         userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         userInfo.NickName = nickname;
+
+        IsLoggedIn = true;
+
         return true;
     }
 
     public async Task<bool> LogInAsync(int userId, string password)
     {
+        if (IsLoggedIn)
+        {
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "已登录，无法重复登录"));
+            return false;
+        }
+
         var response = await chatClientService.CallAPIAsync("login", string.Empty,
                                            new("user_id", userId),
                                                     new("password", password));
@@ -78,7 +111,15 @@ public class ChatRoomService : IChatRoomService
         }
         userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         userInfo.NickName = response.Data["nickname"]?.Value<string>() ?? string.Empty;
+
+        IsLoggedIn = true;
+
         return true;
+    }
+
+    private void ReconnectHandler()
+    {
+        IsLoggedIn = false;
     }
 
     public async Task<bool> JoinRoomAsync(int roomId)
@@ -94,12 +135,13 @@ public class ChatRoomService : IChatRoomService
 
     public async Task SendMessageAsync(string message)
     {
-        var response = await chatClientService.CallAPIAsync("send_message", string.Empty, new APIParameter("sender", userInfo.Id),
-                                                 new APIParameter("message", message));
+        var response = await chatClientService.CallAPIAsync("send_message", string.Empty,
+                                                new("sender", userInfo.Id),
+                                                        new("message", message));
 
         if (response.Success == false)
         {
-            Log.Warning($"消息发送失败: {response.ErrorMessage}");
+            logger.Warning($"消息发送失败: {response.ErrorMessage}");
             OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"消息发送失败: {response.ErrorMessage}"));
             return;
         }

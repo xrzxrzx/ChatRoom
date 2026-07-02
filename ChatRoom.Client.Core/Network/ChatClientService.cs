@@ -83,5 +83,10 @@ namespace ChatRoom.Client.Core.Network
         {
             _eventService.Subscribe(handler);
         }
+
+        public void AddReconnectHandler(IChatClientCoreService.ReconnectHandler reconnectHandler)
+        {
+            _coreService.Reconnect += reconnectHandler;
+        }
     }
 }

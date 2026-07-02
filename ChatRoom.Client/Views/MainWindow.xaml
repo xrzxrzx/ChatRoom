@@ -20,6 +20,8 @@
         <Grid.Resources>
             <converters:NickNameToColorConverter x:Key="NickNameToColorConverter" />
             <converters:NickNameToAlignmentConverter x:Key="NickNameToAlignmentConverter" />
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <converters:BoolToNotVisibilityConverter x:Key="BoolToNotVisibilityConverter" />
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -79,7 +81,8 @@
                             Grid.Column="0"
                             HorizontalAlignment="Stretch"
                             Command="{Binding LoginCommand}"
-                            CommandParameter="Register">
+                            CommandParameter="Register"
+                            Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToNotVisibilityConverter}}">
                             注册
                         </Button>
                         <Button
@@ -87,7 +90,8 @@
                             Grid.Column="2"
                             HorizontalAlignment="Stretch"
                             Command="{Binding LoginCommand}"
-                            CommandParameter="Login">
+                            CommandParameter="Login"
+                            Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToNotVisibilityConverter}}">
                             登录
                         </Button>
                     </Grid>
@@ -95,7 +99,8 @@
                     <Button
                         x:Name="LogoutButton"
                         HorizontalAlignment="Stretch"
-                        Command="{Binding LogoutCommand}">
+                        Command="{Binding LogoutCommand}"
+                        Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}">
                         退出登录
                     </Button>
                 </StackPanel>

@@ -8,9 +8,10 @@ namespace ChatRoom.Client.Core.Network
 {
     public interface IChatClientService : IDisposable
     {
-        public Task<bool> ConnectAsync();
-        public void StartReceiving();
-        public Task<ResponseMessageBag> CallAPIAsync(string apiName, string token, params APIParameter[] parameters);
-        public void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag;
+        Task<bool> ConnectAsync();
+        void StartReceiving();
+        Task<ResponseMessageBag> CallAPIAsync(string apiName, string token, params APIParameter[] parameters);
+        void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag;
+        void AddReconnectHandler(IChatClientCoreService.ReconnectHandler reconnectHandler);
     }
 }

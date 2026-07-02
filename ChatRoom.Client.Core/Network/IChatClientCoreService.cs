@@ -18,5 +18,8 @@ namespace ChatRoom.Client.Core.Network
 
         public delegate void OnResponseReceivedHandler(ResponseMessageBag messageBag);
         public event OnResponseReceivedHandler OnResponseReceived;
+
+        public delegate void ReconnectHandler();
+        public event ReconnectHandler Reconnect;
     }
 }
