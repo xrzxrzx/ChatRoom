@@ -121,7 +121,7 @@
                         x:Name="ChatRoomListView"
                         Grid.Row="0"
                         ItemsSource="{Binding RoomInfoList}"
-                        SelectedItem="{Binding SelectedRoom, Mode=OneWay}">
+                        SelectedItem="{Binding SelectedRoom, Mode=TwoWay}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:RoomInfoModel">
                                 <Grid>

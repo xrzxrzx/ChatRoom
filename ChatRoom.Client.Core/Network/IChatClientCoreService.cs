@@ -10,6 +10,7 @@ namespace ChatRoom.Client.Core.Network
     public interface IChatClientCoreService : IDisposable
     {
         public Task ConnectAsync(ChatClientConfig chatClientConfig);
+        public Task DisconnectAsync();
         public void StartReceive();
         public Task SendMessageAsync(string message);
 

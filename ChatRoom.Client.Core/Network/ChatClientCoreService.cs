@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Serilog;
+using Newtonsoft.Json;
 
 namespace ChatRoom.Client.Core.Network;
 
@@ -52,6 +53,16 @@ public class ChatClientCoreService : IChatClientCoreService
         {
             networkStream = tcpClient.GetStream();
         }
+    }
+
+    public async Task DisconnectAsync()
+    {
+        if (disposed)
+            throw new ObjectDisposedException(nameof(ChatClientCoreService));
+        receiveCancellationTokenSource?.Cancel();
+        receiveTask?.Wait();
+        networkStream?.Close();
+        tcpClient.Close();
     }
 
     public async Task SendMessageAsync(string message)
@@ -113,12 +124,12 @@ public class ChatClientCoreService : IChatClientCoreService
                         continue;
 
                     MessageBagAnalysis bagAnalysis = new MessageBagAnalysis(message);
-                    if (bagAnalysis.IsEvent)//事件消息
+                    if (bagAnalysis.IsEvent)
                     {
                         EventMessageBag messageBag = bagAnalysis.GetEventMessageBag();
                         OnEventReceived?.Invoke(messageBag);
                     }
-                    else//API响应消息
+                    else
                     {
                         ResponseMessageBag responseBag = bagAnalysis.GetResponseMessageBag();
                         OnResponseReceived?.Invoke(responseBag);
@@ -126,8 +137,9 @@ public class ChatClientCoreService : IChatClientCoreService
                 }
             }
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
+            logger.Warning(ex, "接收循环已取消。");
         }
         catch (ObjectDisposedException ex)
         {
@@ -140,6 +152,10 @@ public class ChatClientCoreService : IChatClientCoreService
         catch (IOException ex)
         {
             logger.Warning(ex, "接收数据时发生 I/O 错误。");
+        }
+        catch(Exception ex)
+        {
+            logger.Error(ex, "接收数据时发生未处理的异常。");
         }
         finally
         {

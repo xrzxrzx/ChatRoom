@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Threading.Tasks;
 
 namespace ChatRoom.Client.Function.ChatRoom;
@@ -63,9 +64,10 @@ public class ChatRoomService : IChatRoomService
         return true;
     }
 
-    public void DisconnectToServer()
+    public async Task DisconnectToServer()
     {
-        throw new NotImplementedException();
+        await chatClientService.DisconnectAsync();
+        IsLoggedIn = false;
     }
 
     public async Task<bool> RegisterAsync(int user_id, string password, string nickname)
@@ -115,6 +117,25 @@ public class ChatRoomService : IChatRoomService
         IsLoggedIn = true;
 
         return true;
+    }
+
+    public async Task LogOutAsync()
+    {
+        if (!IsLoggedIn)
+        {
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "未登录，无法登出"));
+            return;
+        }
+        var response = await chatClientService.CallAPIAsync("logout", string.Empty,
+                                                             new APIParameter("user_id", userInfo.Id));
+        if (response.Success == false)
+        {
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"登出失败: {response.ErrorMessage}"));
+            return;
+        }
+
+        await chatClientService.DisconnectAsync();
+        IsLoggedIn = false;
     }
 
     private void ReconnectHandler()
@@ -174,7 +195,23 @@ public class ChatRoomService : IChatRoomService
             return new List<RoomInfo>();
         }
 
-        var roomList = response.Data["room_info_list"]?.ToObject<List<RoomInfo>>() ?? new List<RoomInfo>();
+        List<RoomInfo> roomList = new List<RoomInfo>();
+        var roomListJson = response.Data["room_info_list"];
+
+        if (roomListJson != null)
+        {
+            foreach (var room in roomListJson)
+            {
+                RoomInfo roomInfo = new RoomInfo
+                {
+                    RoomId = room["room_id"]?.Value<int>() ?? 0,
+                    RoomName = room["room_name"]?.Value<string>() ?? string.Empty,
+                    UserCount = room["user_count"]?.Value<int>() ?? 0
+                };
+                roomList.Add(roomInfo);
+            }
+        }
+
         return roomList;
     }
 }

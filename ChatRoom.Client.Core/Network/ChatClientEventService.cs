@@ -7,27 +7,30 @@ namespace ChatRoom.Client.Core.Network
 {
     public class ChatClientEventService : IChatClientEventService
     {
-        ChatClientEventBus eventBus;
-
-        private delegate void EventHandler(EventMessageBag messageBag);
+        private readonly ChatClientEventBus eventBus;
+        private readonly IReadOnlyDictionary<string, Func<JObject, EventMessageBag>> eventFactoryMap;
 
         public ChatClientEventService()
         {
             eventBus = new ChatClientEventBus();
+            eventFactoryMap = new Dictionary<string, Func<JObject, EventMessageBag>>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["message"] = json => new MessageEvent(json),
+                ["notice"] = json => new NoticeEvent(json),
+                ["update"] = json => new UpdateEvent(json),
+                ["request"] = json => new RequestEvent(json),
+                ["heartbeat"] = json => new HeartbeatEvent(json)
+            };
         }
 
         public void OnEventReceived(EventMessageBag messageBag)
         {
-            dynamic? @event = messageBag.PostType switch
+            if (!eventFactoryMap.TryGetValue(messageBag.PostType, out var factory))
             {
-                "message" => messageBag as MessageEvent,
-                "notice" => messageBag as NoticeEvent,
-                "update" => messageBag as UpdateEvent,
-                "request" => messageBag as RequestEvent,
-                "heartbeat" => messageBag as HeartbeatEvent,
-                _ => throw new InvalidOperationException($"Unknown event type: {messageBag.PostType}")
-            };
+                throw new InvalidOperationException($"Unknown event type: {messageBag.PostType}");
+            }
 
+            var @event = factory(messageBag.RawJson);
             eventBus.Publish(@event);
         }
 

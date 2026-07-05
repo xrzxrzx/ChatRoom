@@ -16,8 +16,8 @@ public class RoomInfoModel
     public static RoomInfoModel FromRoomInfo(Function.ChatRoom.RoomInfo roomInfo)
     {
         return new RoomInfoModel(
-            roomInfo.Id,
-            roomInfo.Name,
+            roomInfo.RoomId,
+            roomInfo.RoomName,
             roomInfo.UserCount
         );
     }

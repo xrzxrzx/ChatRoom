@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -28,35 +29,47 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
     public partial RoomInfoModel SelectedRoom { get; set; } = new RoomInfoModel(0, string.Empty, 0);
 
     [ObservableProperty]
-    public partial string InputMessage { get; set; } = string.Empty;
+    public partial string InputMessage { get; set; } = string.Empty; 
 
     [ObservableProperty]
     public partial UserInfoModel UserInfo { get; set; } = new UserInfoModel(0, "未登录");
 
+    private readonly ILogger logger;
     private readonly IChatRoomService chatRoomService;
 
-    public MainWindowViewModel(IChatRoomService chatRoomService)
+    public MainWindowViewModel(IChatRoomService chatRoomService, ILogger logger)
     {
         this.chatRoomService = chatRoomService;
+        this.logger = logger;
         this.chatRoomService.OutputMessage += OnMessageReceived;
 
         IsActive = true;
 
         chatRoomService.OnLoginStatusChanged += OnLoginStatusChanged;
-        IsLoggedIn = chatRoomService.IsLoggedIn;
     }
 
-    private bool isLoggedIn;
     public bool IsLoggedIn
     {
-        get => isLoggedIn;
-        set => SetProperty(ref isLoggedIn, value);
+        get => chatRoomService.IsLoggedIn;
     }
 
     private void OnLoginStatusChanged()
     {
-        IsLoggedIn = chatRoomService.IsLoggedIn;
+        OnPropertyChanged(nameof(IsLoggedIn));
         OnPropertyChanged(nameof(CanLogin));
+
+        if (!IsLoggedIn)
+        {
+            UserInfo = new UserInfoModel(0, "未登录");
+            //MessageInfoList.Clear();
+            RoomInfoList.Clear();
+            MessageInfoList.Add(MessageInfoModel.NewSystemMessage("已退出登录"));
+        }
+
+        LoginCommand.NotifyCanExecuteChanged();
+        LogoutCommand.NotifyCanExecuteChanged();
+        SendMessageCommand.NotifyCanExecuteChanged();
+        RefreshRoomListCommand.NotifyCanExecuteChanged();
     }
 
     private bool CanLogin => !IsLoggedIn;
@@ -94,18 +107,17 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         loginWindow.Activate();
     }
 
-    [RelayCommand(CanExecute = nameof(CanLogin))]
+    [RelayCommand(CanExecute = nameof(IsLoggedIn))]
     private async Task LogoutAsync()
     {
-        //await chatRoomService.LogoutAsync();
-        IsLoggedIn = false;
+        await chatRoomService.LogOutAsync();
         UserInfo = new UserInfoModel(0, "未登录");
         MessageInfoList.Clear();
         RoomInfoList.Clear();
         MessageInfoList.Add(MessageInfoModel.NewSystemMessage("已退出登录"));
     }
 
-    [RelayCommand(CanExecute = nameof(CanLogin))]
+    [RelayCommand(CanExecute = nameof(IsLoggedIn))]
     private async Task SendMessageAsync()
     {
         if (!string.IsNullOrWhiteSpace(InputMessage))
@@ -115,11 +127,14 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         }
     }
 
-    private bool CanRefreshRoomList { get; set; } = true;
+    private bool CanRefreshRoomList => IsLoggedIn && _canRefreshRoomList;
+    private bool _canRefreshRoomList = true;
+
     [RelayCommand(CanExecute = nameof(CanRefreshRoomList))]
     private async Task RefreshRoomListAsync()
     {
-        CanRefreshRoomList = false;
+        _canRefreshRoomList = false;
+        RefreshRoomListCommand.NotifyCanExecuteChanged();
         RoomInfoList.Clear();
         var rooms = await chatRoomService.GetRoomListAsync();
 
@@ -127,7 +142,30 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         {
             RoomInfoList.Add(RoomInfoModel.FromRoomInfo(room));
         }
-        CanRefreshRoomList = true;
+        _canRefreshRoomList = true;
+        RefreshRoomListCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnSelectedRoomChanged(RoomInfoModel value)
+    {
+        if (value != null)
+        {
+            _ = HandleRoomSelectedAsync(value);
+        }
+    }
+
+    private async Task HandleRoomSelectedAsync(RoomInfoModel room)
+    {
+        MessageInfoList.Clear();
+        _ = await chatRoomService.JoinRoomAsync(room.Id);
+        logger.Information($"加入房间: {room.Name} (房间ID: {room.Id})");
+
+        //获取聊天记录
+        //var messages = await chatRoomService.GetMessageListAsync(room.Id);
+        //foreach (var message in messages)
+        //{
+        //    MessageInfoList.Add(MessageInfoModel.FromOutputMessageInfo(message));
+        //}
     }
 
     private void OnMessageReceived(OutputMessageInfo message)
@@ -139,7 +177,6 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
     {
         if (message.Value.Action == AuthAction.Login && message.Value.Result == AuthResult.Success)
         {
-            IsLoggedIn = true;
             UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
                 Id = chatRoomService.GetUserId(),
@@ -155,7 +192,6 @@ public partial class MainWindowViewModel : ObservableRecipient, IRecipient<Value
         }
         else if (message.Value.Action == AuthAction.Register && message.Value.Result == AuthResult.Success)
         {
-            IsLoggedIn = true;
             UserInfo = UserInfoModel.FromUserInfo(new UserInfo
             {
                 Id = chatRoomService.GetUserId(),

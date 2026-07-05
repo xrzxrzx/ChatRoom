@@ -24,12 +24,12 @@
         <TitleBar x:Name="AppTitleBar" Grid.Row="0" />
 
         <NavigationView
-            Grid.Row="1"
             x:Name="LoginNavigationView"
+            Grid.Row="1"
             IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
             ItemInvoked="RootNavigation_ItemInvoked"
             PaneDisplayMode="Top"
-            IsSettingsVisible="False"
             SelectionFollowsFocus="Enabled">
             <NavigationView.MenuItems>
                 <NavigationViewItem

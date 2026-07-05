@@ -216,7 +216,7 @@ void UserSession::HandleSendMessage(const RequestBag& requestBag)
 		return;
 	}
 
-	auto& message = requestBag.GetParams()["message"];
+	string message = requestBag.GetParams()["message"];
 	responseBag.AddData("message", message);
 	DeliverResponse(responseBag);
 
@@ -245,7 +245,7 @@ void UserSession::HandleJoinRoom(const RequestBag& requestBag)
 {
 	ResponseBag responseBag(requestBag.GetEcho());
 
-	auto& roomId = requestBag.GetParams()["room_id"];
+	int roomId = requestBag.GetParams()["room_id"];
 	bool success = server.JoinChatRoom(roomId, shared_from_this());
 	if (!success)
 	{

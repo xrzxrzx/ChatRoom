@@ -5,7 +5,13 @@
 #include"UserSession.h"
 
 ChatServerService::ChatServerService(short port) : acceptor(ioContext, tcp::endpoint(tcp::v4(), port)), socket(ioContext)
-{}
+{
+	AddChatRoom("通用");
+	AddChatRoom("测试");
+	AddChatRoom("语言房间");
+	AddChatRoom("文字聊天");
+	AddChatRoom("超长文字房间");
+}
 
 void ChatServerService::StartAccept()
 {

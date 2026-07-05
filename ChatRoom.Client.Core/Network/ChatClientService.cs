@@ -64,6 +64,11 @@ namespace ChatRoom.Client.Core.Network
             return false;
         }
 
+        public async Task DisconnectAsync()
+        {
+            await _coreService.DisconnectAsync();
+        }
+
         public void StartReceiving()
         {
             _coreService.StartReceive();

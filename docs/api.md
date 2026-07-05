@@ -43,6 +43,7 @@
 | [join_room](#join_room) | 获取房间信息列表 |
 | [register](#register) | 注册 |
 | [login](#login) | 登录 |
+| [logout](#logout) | 登录 |
 | [request](#request-预留) | 请求   |
 
 ***
@@ -139,6 +140,20 @@
 | ------- | ------- | ------- |
 | session_token |  `string` |  会话Token(JWT)  |
 | nickname |  `string` |   用户昵称 |
+
+***
+
+## logout
+
+**请求参数**
+
+| 字段      |   类型   | 注解   |
+| ------- | ------- | ------- |
+| user_id |  `int32` |   用户ID |
+
+**返回数据**
+
+无
 
 ***
 

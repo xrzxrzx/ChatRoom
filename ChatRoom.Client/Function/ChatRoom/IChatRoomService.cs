@@ -2,9 +2,7 @@
 using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.VoiceCommands;
 
 namespace ChatRoom.Client.Function.ChatRoom
 {
@@ -14,10 +12,11 @@ namespace ChatRoom.Client.Function.ChatRoom
         int GetUserId();
         string GetNickName();
         Task<bool> ConnectToServer();
-        void DisconnectToServer();
+        Task DisconnectToServer();
         Task SendMessageAsync(string message);
         Task<bool> LogInAsync(int userId, string password);
         Task<bool> RegisterAsync(int userId, string password, string nickname);
+        Task LogOutAsync();
         Task<bool> JoinRoomAsync(int roomId);
         Task<List<RoomInfo>> GetRoomListAsync();
         Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
