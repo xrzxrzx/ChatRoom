@@ -13,20 +13,22 @@ class EventMessageBag;
 class ChatRoom
 {
 public:
-	ChatRoom(string name, int id) : name(std::move(name)), id(id) {}
+	ChatRoom(string name, int id, bool isSystem) : name(std::move(name)), id(id), isSystem(isSystem) {}
 
 	void AddParticipant(std::shared_ptr<UserSession> participant);
 	void RemoveParticipant(std::shared_ptr<UserSession> participant);
 
-	void Broadcast(const EventMessageBag& eventMessageBag);
+	void Broadcast(const EventMessageBag& eventMessageBag, std::shared_ptr<UserSession> exclude = nullptr);
 
 	string GetName() const { return name; }
 	int GetId() const { return id; }
 	int GetUserCount() const { return participants.size(); }
+	bool IsSystem() const { return isSystem; }
 
 private:
 	string name;
 	int id;
+	bool isSystem = false;
 	vector<std::shared_ptr<UserSession>> participants;
 };
 

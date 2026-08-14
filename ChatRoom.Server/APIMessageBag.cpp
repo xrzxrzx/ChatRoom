@@ -9,6 +9,7 @@ APIMessageBag::RequestBag::RequestBag(string rawMessage)
 	action = jsonMessage["action"].get<string>();
 	params = jsonMessage["params"];
 	echo = jsonMessage["echo"].get<string>();
+	token = jsonMessage.value("token", string());
 }
 
 APIMessageBag::ResponseBag::ResponseBag(const string& echo)

@@ -4,6 +4,8 @@
 #include<queue>
 #include<string>
 #include<unordered_map>
+#include<chrono>
+#include<functional>
 #include<boost/asio.hpp>
 
 #include"APIMessageBag.h"
@@ -32,6 +34,14 @@ public:
 	void DeliverResponse(const ResponseBag& responseBag) { Deliver(responseBag.ToJsonString()); }
 	void DeliverEvent(const EventMessageBag& eventMessageBag) { Deliver(eventMessageBag.ToJsonString()); }
 
+	//关闭连接（清理房间、广播通知、从会话表移除）
+	void Close();
+	//等待待发送数据全部写出后再关闭连接
+	void CloseAfterFlush();
+
+	std::chrono::steady_clock::time_point GetLastActivity() const { return lastActivity; }
+	int GetUserId() const { return userId; }
+
 private:
 	tcp::socket socket;
 	boost::asio::streambuf readBuffer;
@@ -50,11 +60,18 @@ private:
 	int userId;
 	string nickname;
 
+	bool closed = false;
+	bool closeAfterFlush = false;
+	std::chrono::steady_clock::time_point lastActivity;
+
 	void do_write();
 	void do_read();
 
 	//不要调用这个函数直接发送消息，应该调用 DeliverResponse 或 DeliverEvent 来发送响应或事件消息
 	void Deliver(const string& message); 
+	void UpdateActivity() { lastActivity = std::chrono::steady_clock::now(); }
+
+	void LeaveCurrentRoom();
 
 	void HandleLogin(int userId, const string& password, const string& echo);
 	void HandleRegister(const string& password, const string& nickname, const string& echo);
@@ -64,6 +81,8 @@ private:
 	void HandleSendMessage(const RequestBag& requestBag);
 	void HandleGetRoomList(const RequestBag& requestBag);
 	void HandleJoinRoom(const RequestBag& requestBag);
+	void HandleCreateRoom(const RequestBag& requestBag);
+	void HandleLogout(const RequestBag& requestBag);
 	void HandleRequest(const RequestBag& requestBag);
 
 	bool ValidateToken(const string& token, ResponseBag& responseBag);

@@ -7,6 +7,7 @@
 #include"di.hpp"
 
 #include"ChatServerService.h"
+#include"ServerConfig.h"
 #include"UserSession.h"
 #include"UserSessionServiceClient.h"
 
@@ -28,24 +29,28 @@ int main()
 
 	init_spdlog();
 	
-	short port = 12345;
-	spdlog::info("开启服务器...");
+	auto config = ServerConfig::Load();
+	spdlog::info("开启服务器，端口: {}", config.port);
 
 	auto injector = di::make_injector(
-		di::bind<short>.to(port),
+		di::bind<short>.to(config.port),
+		di::bind<std::string>.to(config.grpcAddress),
+		di::bind<ServerConfig>.to(config),
 		di::bind<ChatServerService>.in(di::singleton),
 		di::bind<IUserSessionServiceClient>.to<UserSessionServiceClient>().in(di::singleton)
 	);
 
 	auto chatServerService = injector.create<std::shared_ptr<ChatServerService>>();
 	chatServerService->SetSessionFactory([&injector]() {
-		return injector.create<std::shared_ptr<UserSession>>();
+		//注意：不能使用 injector.create<std::shared_ptr<UserSession>>()，
+		//boost.di 对 shared_ptr 的 deduced 作用域会将其缓存为注入器级单例，导致所有连接复用同一会话对象。
+		//这里显式解析依赖并用 make_shared 创建全新会话。
+		auto& server = injector.create<ChatServerService&>();
+		auto& serviceClient = injector.create<IUserSessionServiceClient&>();
+		return std::make_shared<UserSession>(server, serviceClient);
 		});
 
 	chatServerService->StartAccept();
-	chatServerService->AddChatRoom("游戏开黑");
-	chatServerService->AddChatRoom("技术交流");
-	chatServerService->AddChatRoom("日常吹水");
 }
 
 void init_spdlog()

@@ -1,11 +1,10 @@
-#include "UserSessionServiceClient.h"
+﻿#include "UserSessionServiceClient.h"
 
 #include<spdlog/spdlog.h>
 
-//TODO 目前客户端直接连接到本地服务器，后续可以改为通过依赖注入，使用配置文件服务读取服务器地址
-UserSessionServiceClient::UserSessionServiceClient()
+UserSessionServiceClient::UserSessionServiceClient(const string& address)
 {
-	auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+	auto channel = grpc::CreateChannel(address, grpc::InsecureChannelCredentials());
 	stub_ = UserSessionService::NewStub(channel);
 }
 

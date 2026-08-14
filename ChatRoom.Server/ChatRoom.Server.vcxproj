@@ -143,6 +143,7 @@
     <ClCompile Include="ChatServerService.cpp" />
     <ClCompile Include="EventMessageBag.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ServerConfig.cpp" />
     <ClCompile Include="UserSession.cpp" />
     <ClCompile Include="UserSessionServiceClient.cpp" />
   </ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="di.hpp" />
     <ClInclude Include="EventMessageBag.h" />
     <ClInclude Include="StringTool.hpp" />
+    <ClInclude Include="ServerConfig.h" />
     <ClInclude Include="UserSession.h" />
     <ClInclude Include="UserSessionServiceClient.h" />
   </ItemGroup>

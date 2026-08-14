@@ -12,6 +12,9 @@
 # gRPC Golang编译输出
 *.pb.go
 
+# Go 会话服务本地构建产物
+ChatRoom.Server.Models/Build/*.exe
+
 Compile Protos.bat
 
 # User-specific files

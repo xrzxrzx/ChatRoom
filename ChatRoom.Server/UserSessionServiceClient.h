@@ -42,7 +42,7 @@ public:
 class UserSessionServiceClient : public IUserSessionServiceClient
 {
 public:
-	UserSessionServiceClient();
+	UserSessionServiceClient(const string& address);
 
 	RegisterResponse Register(const string& nickname, const string& password);
 	LoginResponse Login(int userId, const string& password);

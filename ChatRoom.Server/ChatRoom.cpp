@@ -13,10 +13,13 @@ void ChatRoom::RemoveParticipant(std::shared_ptr<UserSession> participant)
 	participants.erase(std::remove(participants.begin(), participants.end(), participant), participants.end());
 }
 
-void ChatRoom::Broadcast(const EventMessageBag& eventMessageBag)
+void ChatRoom::Broadcast(const EventMessageBag& eventMessageBag, std::shared_ptr<UserSession> exclude)
 {
 	for (auto& participant : participants)
 	{
-		participant->DeliverEvent(eventMessageBag);
+		if (participant != exclude)
+		{
+			participant->DeliverEvent(eventMessageBag);
+		}
 	}
 }
