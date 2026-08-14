@@ -125,6 +125,13 @@ try {
     $resp = Read-Response $connA2 'e-forged'
     Assert-True ($resp.recode -eq 502) "伪造 token 返回 502"
 
+    # ---- 4.5 重复昵称注册被拒 ----
+    $connDup = New-ChatConn
+    Send-Json $connDup @{ action = 'register'; params = @{ password = 'pass123'; nickname = $nickA }; token = ''; echo = 'e-reg-dup' }
+    $resp = Read-Response $connDup 'e-reg-dup'
+    Assert-True ($resp.recode -ne 0) "重复昵称注册被拒绝"
+    $connDup.Tcp.Close()
+
     # ---- 5. 创建房间 + 重名 409 ----
     $roomName = "集成测试房_$suffix"
     Send-Json $connA2 @{ action = 'create_room'; params = @{ room_name = $roomName }; token = $tokenA; echo = 'e-create-1' }
@@ -232,6 +239,28 @@ try {
         }
     } catch { }
     Assert-True $closedByTimeout "空闲超时后连接被服务端断开"
+
+    # ---- 12. 注销后 token 失效（黑名单） ----
+    $connE = New-ChatConn
+    Send-Json $connE @{ action = 'login'; params = @{ user_id = $userIdA; password = 'pass123' }; token = ''; echo = 'e-login-e' }
+    $resp = Read-Response $connE 'e-login-e'
+    Assert-True ($resp.recode -eq 0) "用户 E 登录成功（注销测试）"
+    $tokenE = [string]$resp.data.session_token
+
+    Send-Json $connE @{ action = 'logout'; params = @{}; token = $tokenE; echo = 'e-logout' }
+    $resp = Read-Response $connE 'e-logout'
+    Assert-True ($resp.recode -eq 0) "logout 成功"
+    $connE.Tcp.Close()
+
+    $connF = New-ChatConn
+    Send-Json $connF @{ action = 'login'; params = @{ user_id = $userIdA; password = 'pass123' }; token = ''; echo = 'e-login-f' }
+    $resp = Read-Response $connF 'e-login-f'
+    Assert-True ($resp.recode -eq 0) "重新登录成功（获取新 token）"
+
+    Send-Json $connF @{ action = 'get_room_list'; params = @{}; token = $tokenE; echo = 'e-rooms-revoked' }
+    $resp = Read-Response $connF 'e-rooms-revoked'
+    Assert-True ($resp.recode -eq 502) "已注销的旧 token 返回 502"
+    $connF.Tcp.Close()
 
     # ---- 清理连接 ----
     $connA.Tcp.Close()

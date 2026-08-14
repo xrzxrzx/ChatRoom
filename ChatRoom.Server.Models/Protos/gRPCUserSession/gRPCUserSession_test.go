@@ -55,3 +55,24 @@ func TestValidateSession_ForgedToken(t *testing.T) {
 		t.Error("伪造 token 应返回 is_valid=false")
 	}
 }
+
+func TestValidateSession_RevokedToken(t *testing.T) {
+	tokenString, err := JWT.GenerateToken(7)
+	if err != nil {
+		t.Fatalf("GenerateToken 失败: %v", err)
+	}
+	if err := JWT.RevokeToken(tokenString); err != nil {
+		t.Fatalf("RevokeToken 失败: %v", err)
+	}
+
+	server := &Server{}
+	response, err := server.ValidateSession(context.Background(), &ValidateSessionRequest{
+		SessionToken: tokenString,
+	})
+	if err != nil {
+		t.Fatalf("ValidateSession 出错: %v", err)
+	}
+	if response.IsValid {
+		t.Error("已注销 token 应返回 is_valid=false")
+	}
+}

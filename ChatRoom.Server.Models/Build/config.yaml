@@ -1,1 +1,11 @@
 port: 50051
+
+# JWT 签名密钥（生产环境必须修改为随机强密钥）
+jwt_secret: "dev-only-secret-change-me"
+
+db:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: "612278"
+  database: chat_service

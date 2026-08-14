@@ -3,6 +3,7 @@ package JWT
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"sync"
 	"time"
 )
 
@@ -11,8 +12,47 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-// JWT秘钥
+// JWT秘钥（默认值仅用于本地开发，生产环境必须通过 SetSecret 覆盖）
 var jwtSecret = []byte("your-secret-key-change-this")
+
+// 已注销 token 黑名单（内存实现，服务重启后失效；生产可替换为 Redis）
+var revokedTokens sync.Map
+
+// SetSecret 设置 JWT 签名密钥（从配置读取）
+func SetSecret(secret []byte) {
+	if len(secret) > 0 {
+		jwtSecret = secret
+	}
+}
+
+// RevokeToken 将 token 加入注销黑名单
+func RevokeToken(tokenString string) error {
+	claims, err := ParseToken(tokenString)
+	if err != nil {
+		return err
+	}
+
+	revokedTokens.Store(tokenString, claims.ExpiresAt.Time)
+	cleanupExpiredTokens()
+	return nil
+}
+
+// IsTokenRevoked 判断 token 是否已被注销
+func IsTokenRevoked(tokenString string) bool {
+	_, ok := revokedTokens.Load(tokenString)
+	return ok
+}
+
+// cleanupExpiredTokens 清理已过期的黑名单条目（尽力而为）
+func cleanupExpiredTokens() {
+	now := time.Now()
+	revokedTokens.Range(func(key, value interface{}) bool {
+		if expiry, ok := value.(time.Time); ok && expiry.Before(now) {
+			revokedTokens.Delete(key)
+		}
+		return true
+	})
+}
 
 func GenerateToken(id int32) (string, error) {
 	return generateToken(id, time.Now().Add(1*time.Hour))

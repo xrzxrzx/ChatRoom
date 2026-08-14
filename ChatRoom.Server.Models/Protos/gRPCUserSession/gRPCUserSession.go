@@ -4,6 +4,7 @@ import (
 	"ChatRoom.Server.Models/Database"
 	"ChatRoom.Server.Models/JWT"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -23,6 +24,9 @@ func (server *Server) Register(ctx context.Context, req *RegisterRequest) (*Regi
 
 	err = user.CreateUser(req.Password, req.Nickname)
 	if err != nil {
+		if errors.Is(err, Database.ErrNicknameTaken) {
+			return &response, fmt.Errorf("昵称已被占用")
+		}
 		return &response, fmt.Errorf("创建用户失败")
 	}
 
@@ -52,7 +56,7 @@ func (server *Server) Login(ctx context.Context, req *LoginRequest) (*LoginRespo
 		return &response, fmt.Errorf("用户不存在")
 	}
 
-	if user.Password != req.Password {
+	if !user.VerifyPassword(req.Password) {
 		return &response, fmt.Errorf("用户密码错误")
 	}
 
@@ -76,6 +80,10 @@ func (server *Server) Logout(ctx context.Context, req *LogoutRequest) (*LogoutRe
 		return &response, fmt.Errorf("token已过期")
 	}
 
+	if err := JWT.RevokeToken(req.SessionToken); err != nil {
+		return &response, err
+	}
+
 	response.Success = true
 	return &response, nil
 }
@@ -92,7 +100,7 @@ func (server *Server) GetSessionInfo(ctx context.Context, req *SessionInfoReques
 	}
 
 	// 不能直接使用IsTokenExpired判断，因为IsTokenExpired的实现依赖于ParseToken，会造成性能浪费
-	if claims.ExpiresAt.Before(time.Now()) {
+	if claims.ExpiresAt.Before(time.Now()) || JWT.IsTokenRevoked(req.SessionToken) {
 		return &response, fmt.Errorf("token已过期")
 	}
 
@@ -122,6 +130,6 @@ func (server *Server) RefreshSession(ctx context.Context, req *RefreshSessionReq
 
 func (server *Server) ValidateSession(ctx context.Context, req *ValidateSessionRequest) (*ValidateSessionResponse, error) {
 	var response ValidateSessionResponse
-	response.IsValid = !JWT.IsTokenExpired(req.SessionToken)
+	response.IsValid = !JWT.IsTokenExpired(req.SessionToken) && !JWT.IsTokenRevoked(req.SessionToken)
 	return &response, nil
 }
