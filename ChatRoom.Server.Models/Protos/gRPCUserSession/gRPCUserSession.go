@@ -64,6 +64,7 @@ func (server *Server) Login(ctx context.Context, req *LoginRequest) (*LoginRespo
 	response.Success = true
 	response.Nickname = user.Nickname
 	response.SessionToken = tokenString
+	response.UserId = user.Id
 	return &response, nil
 }
 
@@ -121,6 +122,6 @@ func (server *Server) RefreshSession(ctx context.Context, req *RefreshSessionReq
 
 func (server *Server) ValidateSession(ctx context.Context, req *ValidateSessionRequest) (*ValidateSessionResponse, error) {
 	var response ValidateSessionResponse
-	response.IsValid = JWT.IsTokenExpired(req.SessionToken)
+	response.IsValid = !JWT.IsTokenExpired(req.SessionToken)
 	return &response, nil
 }

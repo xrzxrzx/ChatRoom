@@ -15,10 +15,19 @@ type CustomClaims struct {
 var jwtSecret = []byte("your-secret-key-change-this")
 
 func GenerateToken(id int32) (string, error) {
+	return generateToken(id, time.Now().Add(1*time.Hour))
+}
+
+// GenerateTokenWithExpiry 生成指定过期时间的 token（主要供测试与刷新场景使用）
+func GenerateTokenWithExpiry(id int32, expiresAt time.Time) (string, error) {
+	return generateToken(id, expiresAt)
+}
+
+func generateToken(id int32, expiresAt time.Time) (string, error) {
 	claims := CustomClaims{
 		UserId: id,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)), // 过期时间
+			ExpiresAt: jwt.NewNumericDate(expiresAt),                      // 过期时间
 			IssuedAt:  jwt.NewNumericDate(time.Now()),                    // 签发时间
 			NotBefore: jwt.NewNumericDate(time.Now()),                    // 生效时间
 			Issuer:    "ChatRoom.Server.Models",                          // 签发人

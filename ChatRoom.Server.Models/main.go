@@ -24,11 +24,7 @@ func main() {
 
 	log.Printf("服务器监听 %v", lis.Addr())
 
-	for err := server.Serve(lis); true; err = server.Serve(lis) {
-		if err != nil {
-			panic(err)
-		} else {
-			log.Println("gRPC")
-		}
+	if err := server.Serve(lis); err != nil {
+		panic(err)
 	}
 }

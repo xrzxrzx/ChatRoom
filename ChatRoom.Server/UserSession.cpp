@@ -134,11 +134,13 @@ void UserSession::HandleLogin(int userId, const string& password, const string& 
 		return;
 	}
 
+	this->userId = rpcResponse.user_id();
 	this->nickname = rpcResponse.nickname();
 
 	//继续监听客户端请求
 	do_read();
 
+	responseBag.AddData("user_id", this->userId);
 	responseBag.AddData("session_token", rpcResponse.session_token());
 	responseBag.AddData("nickname", this->nickname);
 	DeliverResponse(responseBag);
@@ -272,8 +274,16 @@ void UserSession::HandleRequest(const RequestBag & requestBag)
 
 bool UserSession::ValidateToken(const string& token, ResponseBag& responseBag)
 {
-	auto rpcResponse = gRPCServiceClient.ValidateSession(userId, token);
-	if (!rpcResponse.is_valid())
+	if (token.empty())
+	{
+		responseBag.SetError(502, "令牌不合法");
+		DeliverResponse(responseBag);
+		return false;
+	}
+
+	//以 token 声明中的用户身份为准进行校验，不依赖会话内保存的 userId
+	auto infoResponse = gRPCServiceClient.GetSessionInfo(token);
+	if (infoResponse.user_id() <= 0 || infoResponse.user_id() != userId)
 	{
 		responseBag.SetError(502, "令牌不合法");
 		DeliverResponse(responseBag);

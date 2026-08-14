@@ -14,6 +14,7 @@ public class ChatRoomService : IChatRoomService
     private IChatClientService chatClientService;
     private ILogger logger;
     private UserInfo userInfo;
+    private string sessionToken = string.Empty;
 
     private bool isLoggedIn = false;
     public bool IsLoggedIn
@@ -47,7 +48,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters)
     {
-        return await chatClientService.CallAPIAsync(apiName, string.Empty, parameters);
+        return await chatClientService.CallAPIAsync(apiName, sessionToken, parameters);
     }
 
     public async Task<bool> ConnectToServer()
@@ -67,10 +68,11 @@ public class ChatRoomService : IChatRoomService
     public async Task DisconnectToServer()
     {
         await chatClientService.DisconnectAsync();
+        sessionToken = string.Empty;
         IsLoggedIn = false;
     }
 
-    public async Task<bool> RegisterAsync(int user_id, string password, string nickname)
+    public async Task<bool> RegisterAsync(string password, string nickname)
     {
         if (IsLoggedIn)
         {
@@ -79,7 +81,6 @@ public class ChatRoomService : IChatRoomService
         }
 
         var response = await chatClientService.CallAPIAsync("register", string.Empty,
-                                        new("user_id", user_id),
                                                  new("password", password),
                                                  new("nickname", nickname));
         if (response.Success == false)
@@ -89,6 +90,7 @@ public class ChatRoomService : IChatRoomService
         }
         userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         userInfo.NickName = nickname;
+        sessionToken = response.Data["session_token"]?.Value<string>() ?? string.Empty;
 
         IsLoggedIn = true;
 
@@ -113,6 +115,7 @@ public class ChatRoomService : IChatRoomService
         }
         userInfo.Id = response.Data["user_id"]?.Value<int>() ?? 0;
         userInfo.NickName = response.Data["nickname"]?.Value<string>() ?? string.Empty;
+        sessionToken = response.Data["session_token"]?.Value<string>() ?? string.Empty;
 
         IsLoggedIn = true;
 
@@ -126,8 +129,7 @@ public class ChatRoomService : IChatRoomService
             OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "未登录，无法登出"));
             return;
         }
-        var response = await chatClientService.CallAPIAsync("logout", string.Empty,
-                                                             new APIParameter("user_id", userInfo.Id));
+        var response = await CallAPIAsync("logout");
         if (response.Success == false)
         {
             OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"登出失败: {response.ErrorMessage}"));
@@ -135,11 +137,13 @@ public class ChatRoomService : IChatRoomService
         }
 
         await chatClientService.DisconnectAsync();
+        sessionToken = string.Empty;
         IsLoggedIn = false;
     }
 
     private void ReconnectHandler()
     {
+        sessionToken = string.Empty;
         IsLoggedIn = false;
     }
 
@@ -156,9 +160,7 @@ public class ChatRoomService : IChatRoomService
 
     public async Task SendMessageAsync(string message)
     {
-        var response = await chatClientService.CallAPIAsync("send_message", string.Empty,
-                                                new("sender", userInfo.Id),
-                                                        new("message", message));
+        var response = await CallAPIAsync("send_message", new APIParameter("message", message));
 
         if (response.Success == false)
         {

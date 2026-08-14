@@ -15,7 +15,7 @@ namespace ChatRoom.Client.Function.ChatRoom
         Task DisconnectToServer();
         Task SendMessageAsync(string message);
         Task<bool> LogInAsync(int userId, string password);
-        Task<bool> RegisterAsync(int userId, string password, string nickname);
+        Task<bool> RegisterAsync(string password, string nickname);
         Task LogOutAsync();
         Task<bool> JoinRoomAsync(int roomId);
         Task<List<RoomInfo>> GetRoomListAsync();

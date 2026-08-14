@@ -193,7 +193,7 @@ namespace ChatRoom.Client.ViewModels
                 return;
             }
 
-            var result = await chatRoomService.RegisterAsync(userId, Password, NickName);
+            var result = await chatRoomService.RegisterAsync(Password, NickName);
             if (result)
             {
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<AuthResultMessage>(
