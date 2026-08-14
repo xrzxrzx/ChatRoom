@@ -5,3 +5,5 @@
   * [Event](event.md)
 * 项目规划
   * [总体规划](plans/README.md)
+* 开发规范
+  * [编码规范](编码规范.md)

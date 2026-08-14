@@ -27,10 +27,10 @@ func generateToken(id int32, expiresAt time.Time) (string, error) {
 	claims := CustomClaims{
 		UserId: id,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expiresAt),                      // 过期时间
-			IssuedAt:  jwt.NewNumericDate(time.Now()),                    // 签发时间
-			NotBefore: jwt.NewNumericDate(time.Now()),                    // 生效时间
-			Issuer:    "ChatRoom.Server.Models",                          // 签发人
+			ExpiresAt: jwt.NewNumericDate(expiresAt),  // 过期时间
+			IssuedAt:  jwt.NewNumericDate(time.Now()), // 签发时间
+			NotBefore: jwt.NewNumericDate(time.Now()), // 生效时间
+			Issuer:    "ChatRoom.Server.Models",       // 签发人
 			Subject:   fmt.Sprintf("%d", id),
 		},
 	}

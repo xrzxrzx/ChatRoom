@@ -50,6 +50,6 @@ ChatRoom/
 - [项目总体规划与阶段划分](plans/README.md)
 - [API 协议](api.md)
 - [Event 协议](event.md)
+- [编码规范](编码规范.md)
 
 > 详细的环境要求、构建与运行步骤将在工程化阶段补充（见 [总体规划](plans/README.md) Stage 5）。
-
