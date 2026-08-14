@@ -58,20 +58,23 @@ namespace ChatRoom.Client.Core.Network
         public void OnResponseReceived(ResponseMessageBag messageBag)
         {
             string echo = messageBag.Echo;
-            TaskCompletionSource<ResponseMessageBag>? tcs;
-
-            _responseWaiters.TryGetValue(echo, out tcs);
-            if(tcs == null)
+            if (_responseWaiters.TryRemove(echo, out var tcs))
+            {
+                tcs.TrySetResult(messageBag);
+            }
+            else
             {
                 logger.Warning($"未找到对应的 API 响应等待者，Echo: {echo}");
             }
-
-            tcs?.SetResult(messageBag);
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            foreach (var waiter in _responseWaiters)
+            {
+                waiter.Value.TrySetCanceled();
+            }
+            _responseWaiters.Clear();
         }
     }
 

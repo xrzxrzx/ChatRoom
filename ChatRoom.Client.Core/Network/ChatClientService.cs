@@ -34,6 +34,9 @@ namespace ChatRoom.Client.Core.Network
             _coreService.OnEventReceived += _eventService.OnEventReceived;
             _coreService.OnResponseReceived += _apiService.OnResponseReceived;
             _apiService.SendMessageAsync += _coreService.SendMessageAsync;
+
+            //启动事件分发消费者（幂等）
+            _eventService.StartHandleEvents();
         }
 
         public async Task<bool> ConnectAsync()
@@ -81,12 +84,23 @@ namespace ChatRoom.Client.Core.Network
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _coreService.OnEventReceived -= _eventService.OnEventReceived;
+            _coreService.OnResponseReceived -= _apiService.OnResponseReceived;
+            _apiService.SendMessageAsync -= _coreService.SendMessageAsync;
+
+            _coreService.Dispose();
+            _apiService.Dispose();
+            _eventService.Dispose();
         }
 
         public void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag
         {
             _eventService.Subscribe(handler);
+        }
+
+        public void UnsubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag
+        {
+            _eventService.Unsubscribe(handler);
         }
 
         public void AddReconnectHandler(IChatClientCoreService.ReconnectHandler reconnectHandler)

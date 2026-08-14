@@ -1,6 +1,5 @@
-﻿using ChatRoom.Client.Core.Network.MessageBag;
+using ChatRoom.Client.Core.Network.MessageBag;
 using Newtonsoft.Json.Linq;
-using System.Collections.Concurrent;
 using System.Threading.Channels;
 
 namespace ChatRoom.Client.Core.Network
@@ -25,9 +24,10 @@ namespace ChatRoom.Client.Core.Network
 
         public void OnEventReceived(EventMessageBag messageBag)
         {
+            //未知事件类型直接忽略，避免影响接收循环
             if (!eventFactoryMap.TryGetValue(messageBag.PostType, out var factory))
             {
-                throw new InvalidOperationException($"Unknown event type: {messageBag.PostType}");
+                return;
             }
 
             var @event = factory(messageBag.RawJson);
@@ -39,47 +39,96 @@ namespace ChatRoom.Client.Core.Network
             eventBus.StartConsumeEvents();
         }
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
         public void Subscribe<T>(Action<T> handler) where T : EventMessageBag
         {
             eventBus.Subscribe(handler);
+        }
+
+        public void Unsubscribe<T>(Action<T> handler) where T : EventMessageBag
+        {
+            eventBus.Unsubscribe(handler);
+        }
+
+        public void Dispose()
+        {
+            eventBus.Close();
         }
     }
 
     internal class ChatClientEventBus
     {
-        Channel<EventMessageBag> eventChannel;
-        ConcurrentDictionary<string, List<Action<EventMessageBag>>> subscribers;
+        private readonly Channel<EventMessageBag> eventChannel;
+        private readonly object sync = new();
+        private readonly Dictionary<string, List<Action<EventMessageBag>>> subscribers = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<Delegate, Action<EventMessageBag>> handlerWrappers = new();
+        private bool closed;
 
         public ChatClientEventBus()
         {
             eventChannel = Channel.CreateUnbounded<EventMessageBag>();
-            subscribers = new ConcurrentDictionary<string, List<Action<EventMessageBag>>>();
         }
 
         public void Publish<T>(T messageBag) where T : EventMessageBag
         {
-            eventChannel.Writer.WriteAsync(messageBag);
+            if (closed)
+            {
+                return;
+            }
+            eventChannel.Writer.TryWrite(messageBag);
         }
 
         public void Subscribe<T>(Action<T> handler) where T : EventMessageBag
         {
-            string type = typeof(T).Name;
-            subscribers.AddOrUpdate(type, new List<Action<EventMessageBag>> { msg => handler((T)msg) },
-                (key, existingHandlers) =>
+            var wrapper = new Action<EventMessageBag>(msg => handler((T)msg));
+            string key = GetPostType<T>();
+            lock (sync)
+            {
+                handlerWrappers[handler] = wrapper;
+                if (!subscribers.TryGetValue(key, out var list))
                 {
-                    existingHandlers.Add(msg => handler((T)msg));
-                    return existingHandlers;
-                });
+                    list = new List<Action<EventMessageBag>>();
+                    subscribers[key] = list;
+                }
+                list.Add(wrapper);
+            }
+        }
+
+        public void Unsubscribe<T>(Action<T> handler) where T : EventMessageBag
+        {
+            lock (sync)
+            {
+                if (!handlerWrappers.TryGetValue(handler, out var wrapper))
+                {
+                    return;
+                }
+
+                handlerWrappers.Remove(handler);
+                string key = GetPostType<T>();
+                if (subscribers.TryGetValue(key, out var list))
+                {
+                    list.Remove(wrapper);
+                    if (list.Count == 0)
+                    {
+                        subscribers.Remove(key);
+                    }
+                }
+            }
         }
 
         public void StartConsumeEvents()
         {
             Task.Run(() => ConsumeEventsAsync());
+        }
+
+        public void Close()
+        {
+            lock (sync)
+            {
+                closed = true;
+                subscribers.Clear();
+                handlerWrappers.Clear();
+            }
+            eventChannel.Writer.TryComplete();
         }
 
         private async Task ConsumeEventsAsync()
@@ -92,13 +141,31 @@ namespace ChatRoom.Client.Core.Network
 
         private async Task DispatchEventAsync(EventMessageBag message)
         {
-            if (subscribers.TryGetValue(message.PostType, out var handlers))
+            List<Action<EventMessageBag>> handlers;
+            lock (sync)
             {
-                foreach (var handler in handlers)
+                if (!subscribers.TryGetValue(message.PostType, out var list))
                 {
-                    await Task.Run(() => handler(message));
+                    return;
                 }
+                handlers = list.ToList();
             }
+
+            foreach (var handler in handlers)
+            {
+                await Task.Run(() => handler(message));
+            }
+        }
+
+        //事件类型名去掉 Event 后缀并转小写，与服务端 post_type 对齐：
+        //MessageEvent -> message、NoticeEvent -> notice、UpdateEvent -> update ...
+        private static string GetPostType<T>() where T : EventMessageBag
+        {
+            const string suffix = "Event";
+            var name = typeof(T).Name;
+            return name.EndsWith(suffix, StringComparison.Ordinal)
+                ? name[..^suffix.Length].ToLowerInvariant()
+                : name.ToLowerInvariant();
         }
     }
 
@@ -145,3 +212,4 @@ namespace ChatRoom.Client.Core.Network
     }
     #endregion
 }
+

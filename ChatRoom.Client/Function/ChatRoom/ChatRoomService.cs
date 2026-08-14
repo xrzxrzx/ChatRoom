@@ -1,10 +1,9 @@
-﻿using ChatRoom.Client.Core.Network;
+using ChatRoom.Client.Core.Network;
 using ChatRoom.Client.Core.Network.MessageBag.APIMessageBag;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Formats.Asn1;
 using System.Threading.Tasks;
 
 namespace ChatRoom.Client.Function.ChatRoom;
@@ -30,8 +29,11 @@ public class ChatRoomService : IChatRoomService
         }
     }
 
+    public int? JoinedRoomId { get; private set; }
+
     public event IChatRoomService.OutputMessageDelegate? OutputMessage;
     public event IChatRoomService.OnLoginStatusChangedDelegate? OnLoginStatusChanged;
+    public event IChatRoomService.RoomListUpdatedDelegate? RoomListUpdated;
 
     public ChatRoomService(IChatClientService chatClientService, ILogger logger)
     {
@@ -43,6 +45,9 @@ public class ChatRoomService : IChatRoomService
         ChatRoomFunction.SetOutputMessageDelegate(message => OutputMessage?.Invoke(message));
 
         this.chatClientService.SubscribeToEvent<MessageEvent>(ChatRoomFunction.OutputMessage);
+        this.chatClientService.SubscribeToEvent<UpdateEvent>(OnUpdateEvent);
+        this.chatClientService.SubscribeToEvent<NoticeEvent>(OnNoticeEvent);
+        this.chatClientService.SubscribeToEvent<HeartbeatEvent>(OnHeartbeatEvent);
         this.chatClientService.AddReconnectHandler(ReconnectHandler);
     }
 
@@ -53,7 +58,6 @@ public class ChatRoomService : IChatRoomService
 
     public async Task<bool> ConnectToServer()
     {
-
         var result = await chatClientService.ConnectAsync();
         if (result == false)
         {
@@ -69,6 +73,7 @@ public class ChatRoomService : IChatRoomService
     {
         await chatClientService.DisconnectAsync();
         sessionToken = string.Empty;
+        JoinedRoomId = null;
         IsLoggedIn = false;
     }
 
@@ -138,24 +143,61 @@ public class ChatRoomService : IChatRoomService
 
         await chatClientService.DisconnectAsync();
         sessionToken = string.Empty;
+        JoinedRoomId = null;
         IsLoggedIn = false;
     }
 
-    private void ReconnectHandler()
+    private async void ReconnectHandler()
     {
-        sessionToken = string.Empty;
-        IsLoggedIn = false;
+        try
+        {
+            sessionToken = string.Empty;
+            JoinedRoomId = null;
+            IsLoggedIn = false;
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "连接已断开，正在自动重连..."));
+
+            bool connected = await chatClientService.ConnectAsync();
+            if (connected)
+            {
+                chatClientService.StartReceiving();
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "已重新连接，请重新登录"));
+            }
+            else
+            {
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, "自动重连失败，请检查网络后重试"));
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, "自动重连失败");
+        }
     }
 
     public async Task<bool> JoinRoomAsync(int roomId)
     {
-        var response = await chatClientService.CallAPIAsync("join_room", string.Empty, new APIParameter("room_id", roomId));
+        var response = await CallAPIAsync("join_room", new APIParameter("room_id", roomId));
         if (response.Success == false)
         {
             OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"加入房间失败: {response.ErrorMessage}"));
             return false;
         }
+        JoinedRoomId = roomId;
         return true;
+    }
+
+    public async Task<int?> CreateRoomAsync(string roomName)
+    {
+        var response = await CallAPIAsync("create_room", new APIParameter("room_name", roomName));
+        if (response.Success == false)
+        {
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"创建房间失败: {response.ErrorMessage}"));
+            return null;
+        }
+
+        int roomId = response.Data.Value<int>("room_id");
+        JoinedRoomId = roomId; //服务端已自动将创建者加入房间
+        OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"房间「{roomName}」创建成功"));
+        return roomId;
     }
 
     public async Task SendMessageAsync(string message)
@@ -172,9 +214,92 @@ public class ChatRoomService : IChatRoomService
         OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.Self, message));
     }
 
+    public async Task<List<RoomInfo>> GetRoomListAsync()
+    {
+        var response = await CallAPIAsync("get_room_list");
+
+        if (!response.Success)
+        {
+            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"获取房间列表失败: {response.ErrorMessage}"));
+            return new List<RoomInfo>();
+        }
+
+        return ParseRoomList(response.Data["room_info_list"]);
+    }
+
+    private void OnUpdateEvent(UpdateEvent @event)
+    {
+        if (!string.Equals(@event.Data.Value<string>("update_type"), "room_list", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var roomList = ParseRoomList(@event.Data["update_data"]);
+        RoomListUpdated?.Invoke(roomList);
+    }
+
+    private void OnNoticeEvent(NoticeEvent @event)
+    {
+        var noticeType = @event.Data.Value<string>("notice_type");
+        var nickname = @event.Data.Value<string>("nickname") ?? string.Empty;
+
+        switch (noticeType)
+        {
+            case "join_room":
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"{nickname} 加入了房间"));
+                break;
+            case "leave_room":
+                OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"{nickname} 离开了房间"));
+                break;
+        }
+    }
+
+    private async void OnHeartbeatEvent(HeartbeatEvent @event)
+    {
+        //仅登录状态下回发心跳，未登录连接由服务端按空闲超时清理
+        if (!IsLoggedIn)
+        {
+            return;
+        }
+
+        try
+        {
+            await CallAPIAsync("heartbeat");
+        }
+        catch (Exception ex)
+        {
+            logger.Warning(ex, "心跳回应失败");
+        }
+    }
+
+    private List<RoomInfo> ParseRoomList(JToken? roomListJson)
+    {
+        var roomList = new List<RoomInfo>();
+        if (roomListJson is not JArray array)
+        {
+            return roomList;
+        }
+
+        foreach (var room in array)
+        {
+            roomList.Add(new RoomInfo
+            {
+                RoomId = room["room_id"]?.Value<int>() ?? 0,
+                RoomName = room["room_name"]?.Value<string>() ?? string.Empty,
+                UserCount = room["user_count"]?.Value<int>() ?? 0
+            });
+        }
+
+        return roomList;
+    }
+
     public void Dispose()
     {
-        throw new NotImplementedException();
+        chatClientService.UnsubscribeToEvent<MessageEvent>(ChatRoomFunction.OutputMessage);
+        chatClientService.UnsubscribeToEvent<UpdateEvent>(OnUpdateEvent);
+        chatClientService.UnsubscribeToEvent<NoticeEvent>(OnNoticeEvent);
+        chatClientService.UnsubscribeToEvent<HeartbeatEvent>(OnHeartbeatEvent);
+        chatClientService.Dispose();
     }
 
     public int GetUserId()
@@ -186,34 +311,5 @@ public class ChatRoomService : IChatRoomService
     {
         return userInfo.NickName;
     }
-
-    public async Task<List<RoomInfo>> GetRoomListAsync()
-    {
-        var response = await chatClientService.CallAPIAsync("get_room_list", string.Empty);
-
-        if (!response.Success)
-        {
-            OutputMessage?.Invoke(new(OutputMessageInfo.MessageSenderType.System, $"获取房间列表失败: {response.ErrorMessage}"));
-            return new List<RoomInfo>();
-        }
-
-        List<RoomInfo> roomList = new List<RoomInfo>();
-        var roomListJson = response.Data["room_info_list"];
-
-        if (roomListJson != null)
-        {
-            foreach (var room in roomListJson)
-            {
-                RoomInfo roomInfo = new RoomInfo
-                {
-                    RoomId = room["room_id"]?.Value<int>() ?? 0,
-                    RoomName = room["room_name"]?.Value<string>() ?? string.Empty,
-                    UserCount = room["user_count"]?.Value<int>() ?? 0
-                };
-                roomList.Add(roomInfo);
-            }
-        }
-
-        return roomList;
-    }
 }
+

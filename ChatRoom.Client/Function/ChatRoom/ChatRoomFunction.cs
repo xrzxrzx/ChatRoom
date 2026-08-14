@@ -28,7 +28,7 @@ namespace ChatRoom.Client.Function.ChatRoom
                 return;
             }
 
-            var id = @event.Data["id"]?.Value<int>("sender") ?? 0;
+            var id = @event.Data.Value<int?>("sender") ?? 0;
             var messageContent = @event.Data.Value<string>("message") ?? string.Empty;
 
 

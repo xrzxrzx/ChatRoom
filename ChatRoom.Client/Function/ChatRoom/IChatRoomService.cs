@@ -18,13 +18,19 @@ namespace ChatRoom.Client.Function.ChatRoom
         Task<bool> RegisterAsync(string password, string nickname);
         Task LogOutAsync();
         Task<bool> JoinRoomAsync(int roomId);
+        Task<int?> CreateRoomAsync(string roomName);
         Task<List<RoomInfo>> GetRoomListAsync();
         Task<ResponseMessageBag> CallAPIAsync(string apiName, params APIParameter[] parameters);
+
+        int? JoinedRoomId { get; }
 
         public delegate void OutputMessageDelegate(OutputMessageInfo outputMessage);
         public event OutputMessageDelegate? OutputMessage;
 
         public delegate void OnLoginStatusChangedDelegate();
         public event OnLoginStatusChangedDelegate? OnLoginStatusChanged;
+
+        public delegate void RoomListUpdatedDelegate(List<RoomInfo> roomList);
+        public event RoomListUpdatedDelegate? RoomListUpdated;
     }
 }

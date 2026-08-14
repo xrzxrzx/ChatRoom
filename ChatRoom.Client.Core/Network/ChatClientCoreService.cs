@@ -17,6 +17,7 @@ public class ChatClientCoreService : IChatClientCoreService
     private CancellationTokenSource? receiveCancellationTokenSource;
     private Task? receiveTask;
     private bool disposed;
+    private bool isDisconnecting;
 
     private ILogger logger;
 
@@ -59,10 +60,26 @@ public class ChatClientCoreService : IChatClientCoreService
     {
         if (disposed)
             throw new ObjectDisposedException(nameof(ChatClientCoreService));
-        receiveCancellationTokenSource?.Cancel();
-        receiveTask?.Wait();
-        networkStream?.Close();
-        tcpClient.Close();
+
+        isDisconnecting = true;
+        try
+        {
+            receiveCancellationTokenSource?.Cancel();
+            if (receiveTask is not null)
+            {
+                try { receiveTask.Wait(); } catch { }
+            }
+
+            //重置连接对象，使断开后可再次连接
+            networkStream?.Dispose();
+            networkStream = null;
+            tcpClient.Dispose();
+            tcpClient = new TcpClient();
+        }
+        finally
+        {
+            isDisconnecting = false;
+        }
     }
 
     public async Task SendMessageAsync(string message)
@@ -159,7 +176,11 @@ public class ChatClientCoreService : IChatClientCoreService
         }
         finally
         {
-            Reconnect?.Invoke();//重置连接状态
+            //主动断开时不触发重连
+            if (!isDisconnecting)
+            {
+                Reconnect?.Invoke();//重置连接状态并通知上层重连
+            }
             receiveTask = null;
             receiveCancellationTokenSource?.Dispose();
             receiveCancellationTokenSource = null;
@@ -178,14 +199,21 @@ public class ChatClientCoreService : IChatClientCoreService
     public void Dispose()
     {
         disposed = true;
+        isDisconnecting = true;
 
         receiveCancellationTokenSource?.Cancel();
         receiveCancellationTokenSource?.Dispose();
         receiveCancellationTokenSource = null;
 
-        networkStream?.Dispose();
-        networkStream = null;
-
-        tcpClient.Dispose();
+        try
+        {
+            networkStream?.Dispose();
+            networkStream = null;
+            tcpClient.Dispose();
+        }
+        catch
+        {
+            //释放阶段忽略异常
+        }
     }
 }

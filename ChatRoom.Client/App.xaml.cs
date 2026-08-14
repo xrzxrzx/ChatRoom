@@ -101,5 +101,16 @@ namespace ChatRoom.Client
             }
             _window.Activate();
         }
+
+        /// <summary>
+        /// 应用退出时释放全部服务
+        /// </summary>
+        public void ShutdownServices()
+        {
+            if (ServiceProvider is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
     }
 }

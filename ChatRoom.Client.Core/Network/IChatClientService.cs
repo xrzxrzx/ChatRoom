@@ -13,6 +13,7 @@ namespace ChatRoom.Client.Core.Network
         void StartReceiving();
         Task<ResponseMessageBag> CallAPIAsync(string apiName, string token, params APIParameter[] parameters);
         void SubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag;
+        void UnsubscribeToEvent<T>(Action<T> handler) where T : EventMessageBag;
         void AddReconnectHandler(IChatClientCoreService.ReconnectHandler reconnectHandler);
     }
 }

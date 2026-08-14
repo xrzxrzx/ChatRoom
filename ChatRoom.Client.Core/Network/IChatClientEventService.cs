@@ -10,5 +10,6 @@ namespace ChatRoom.Client.Core.Network
         public void OnEventReceived(EventMessageBag messageBag);
         public void StartHandleEvents();
         public void Subscribe<T>(Action<T> handler) where T : EventMessageBag;
+        public void Unsubscribe<T>(Action<T> handler) where T : EventMessageBag;
     }
 }
