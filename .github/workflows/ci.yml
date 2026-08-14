@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  go:
+    name: Go 单元测试
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: go test
+        working-directory: ChatRoom.Server.Models
+        run: go test ./...
+
+  dotnet:
+    name: .NET 构建与测试
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: 构建 ChatRoom.Client.Core
+        run: dotnet build ChatRoom.Client.Core/ChatRoom.Client.Core.csproj --nologo
+      - name: Core 单元测试
+        run: dotnet test ChatRoom.Client.Core.Tests/ChatRoom.Client.Core.Tests.csproj --nologo
+

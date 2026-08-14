@@ -51,5 +51,7 @@ ChatRoom/
 - [API 协议](api.md)
 - [Event 协议](event.md)
 - [编码规范](编码规范.md)
+- [数据库初始化脚本](sql/init.sql)
+- [项目 README：构建与运行手册](../README.md)
 
 > 详细的环境要求、构建与运行步骤将在工程化阶段补充（见 [总体规划](plans/README.md) Stage 5）。
